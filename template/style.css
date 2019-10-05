@@ -1,0 +1,84 @@
+body, html {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+}
+
+#side-menu {
+  width: 300px;
+  min-width: 300px;
+}
+
+#side-menu ul {
+  padding-left: 1em;
+}
+
+#side-menu li {
+  list-style-type: none;
+  word-break: keep-all;
+  white-space: nowrap;
+}
+
+.bullet {
+  font-size: 0.5em;
+  vertical-align: middle;
+}
+
+::-webkit-scrollbar {
+  width: 16px;
+  height: 16px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0);
+}
+
+::-webkit-scrollbar-thumb {
+  background: #bbb;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #aaa;
+}
+
+.table-arguments td:first-child {
+  width: 15%;
+}
+
+.table-arguments td:not(:first-child):not(:last-child) {
+  width: 10%;
+}
+
+.table-arguments td:last-child {
+  max-width: 75%;
+  width: 100%;
+}
+
+.cursor-pointer { cursor: pointer; }
+
+.table-fixed { table-layout: fixed; }
+
+.overflow-auto { overflow: auto; }
+.overflow-hidden { overflow: hidden; }
+.overflow-scroll { overflow: scroll; }
+
+.overflow-x-auto { overflow-x: auto; }
+.overflow-x-hidden { overflow-x: hidden; }
+.overflow-x-scroll { overflow-x: scroll; }
+
+.overflow-y-auto { overflow-y: auto; }
+.overflow-y-hidden { overflow-y: hidden; }
+.overflow-y-scroll { overflow-y: scroll; }
+
+@media (max-width: 767.98px) {
+  #side-menu {
+    min-width: 90%;
+  }
+
+  /* #page-wrapper {
+    min-width: 100%;
+  } */
+  #page-content {
+    min-width: 767.98px;
+  }
+}
