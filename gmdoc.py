@@ -43,55 +43,58 @@ def add_bootstrap(code, table_class=""):
 
 
 def function_to_markdown(fn):
-    content = []
+    template = ("# {name}\n"
+                "`script`\n"
+                "```gml\n"
+                "{signature}\n"
+                "```")
 
-    content.append("""
-# {name}
-`script`
-```gml
-{signature}
-```
-"""[1:-1].format(**fn))
+    template_desc = ("## Description\n"
+                     "{desc}")
+
+    template_header = ("### Arguments\n"
+                       "| Name | Type | Description |\n"
+                       "| ---- | ---- | ----------- |\n")
+
+    template_row = "| {name} | `{type}` | {desc} |"
+
+    template_return = ("## Returns\n"
+                       "`{type}` {desc}")
+
+    template_example = ("## Example\n"
+                        "{example}")
+
+    template_note = ("## Note\n"
+                     "{note}")
+
+    template_source = ("## Source\n"
+                       "{source}")
+
+    content = []
+    content.append(template.format(**fn))
 
     if fn.get("desc"):
-        content.append("""
-## Description
-{desc}
-"""[1:-1].format(**fn))
+        content.append(template_desc.format(**fn))
 
     params = fn.get("params", [])
     if params:
         for p in params:
             p["desc"] = re.sub(r"\n+", " ", p["desc"])
-        content.append("""### Arguments
-| Name | Type | Description |
-| ---- | ---- | ----------- |
-""" + "\n".join(["| {name} | `{type}` | {desc} |".format(**p) for p in params]))
+        content.append(
+            template_header + "\n".join([template_row.format(**p) for p in params]))
 
     retval = fn.get("return", {})
     if retval:
-        content.append("""
-## Returns
-`{type}` {desc}
-"""[1:-1].format(**retval))
+        content.append(template_return.format(**retval))
 
     if fn.get("example"):
-        content.append("""
-## Example
-{example}
-"""[1:-1].format(**fn))
+        content.append(template_example.format(**fn))
 
     if fn.get("note"):
-        content.append("""
-## Note
-{note}
-"""[1:-1].format(**fn))
+        content.append(template_note.format(**fn))
 
     if fn.get("source"):
-        content.append("""
-## Source
-{source}
-"""[1:-1].format(**fn))
+        content.append(template_source.format(**fn))
 
     see = fn.get("see")
     if see:
@@ -103,38 +106,38 @@ def function_to_markdown(fn):
 
 
 def enum_to_markdown(en):
-    content = []
+    template = ("# {name}\n"
+                "`enum`\n"
+                "## Description\n"
+                "{desc}")
 
-    content.append("""
-# {name}
-`enum`
-## Description
-{desc}
-"""[1:-1].format(**en))
+    template_header = ("### Members\n"
+                       "| Name | Description |\n"
+                       "| ---- | ----------- |\n")
+
+    template_row = "| `{name}` | {desc} |"
+
+    content = []
+    content.append(template.format(**en))
 
     members = en.get("members", [])
+
     if members:
         for p in members:
             p["desc"] = re.sub(r"\n+", " ", p["desc"])
-        content.append("""### Members
-| Name | Description |
-| ---- | ----------- |
-""" + "\n".join(["| `{name}` | {desc} |".format(**p) for p in members]))
+
+        content.append(
+            template_header + "\n".join([template_row.format(**p) for p in members]))
 
     return "\n\n".join(content)
 
 
 def macro_to_markdown(macro):
-    content = []
-
-    content.append("""
-# {name}
-`macro`
-## Description
-`{type}` {desc}
-"""[1:-1].format(**macro))
-
-    return "\n\n".join(content)
+    template = ("# {name}\n"
+                "`macro`\n"
+                "## Description\n"
+                "`{type}` {desc}")
+    return template.format(**macro)
 
 
 def format_template(template, tag, value):
