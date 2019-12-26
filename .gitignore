@@ -1,3 +1,4 @@
-.vscode/
-env/
+/.vscode/
+/env/
+/test/
 pip-selfcheck.json

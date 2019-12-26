@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 import datetime
 import json
 import os
@@ -9,6 +11,7 @@ from enum import Enum
 
 import mistune
 
+VERSION = 2
 
 TEMPLATE_ANALYTICS = """
   <!-- Global site tag (gtag.js) - Google Analytics -->
@@ -851,6 +854,28 @@ def make_pages(toc, flattened):
         make_page(k, v, [], [])
 
 
+def copytree(src, dst, symlinks=False, ignore=None):
+    """
+    Source: https://stackoverflow.com/a/12514470
+    """
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            shutil.copytree(s, d, symlinks, ignore)
+        else:
+            shutil.copy2(s, d)
+
+
+def get_input(text, default=""):
+    if default:
+        text += " [{}]".format(default)
+    text += ": "
+    val = input(text)
+    if not val:
+        return default
+    return val
+
 if __name__ == "__main__":
     current_dir = os.getcwd()
     gmdoc_dir = os.path.dirname(os.path.realpath(__file__))
@@ -858,10 +883,57 @@ if __name__ == "__main__":
     if len(sys.argv) < 2:
         print("TARGET not defined!")
         print("Correct usage: gmdoc TARGET")
+        print()
+        print("  TARGET - init  - Initialize gmdoc in the current directory")
+        print("         - build - Build documentation")
         exit()
 
     target = sys.argv[1]
     project_dir = current_dir
+
+    if target == "init":
+        _project = get_input("Project file (*.yyp)")
+        _project_name = get_input("Project name")
+        _title = get_input("Document title", _project_name + " Docs")
+        _author = get_input("Author name")
+        _prefix = get_input("Prefix")
+        _analytics = get_input("Google Analytics code")
+
+        data = {
+            "_version": VERSION,
+            "project": _project,
+            "project_name": _project_name,
+            "title": _title,
+            "author": _author,
+            "prefix": _prefix,
+            "analytics": _analytics,
+            "api": {
+                "rating": "/api/page_rating"
+            },
+            "toc": {}
+        }
+        data["toc"][_title] = "index.md"
+
+        with open("gmdoc.json", "w") as f:
+            json.dump(data, f, indent=2)
+
+        _docs_src_dest = os.path.join(current_dir, "docs_src")
+        os.makedirs(_docs_src_dest, exist_ok=True)
+
+        copytree(
+            os.path.join(gmdoc_dir, "docs_src"),
+            _docs_src_dest,
+        )
+
+        for root, _, files in os.walk(_docs_src_dest):
+            for name in files:
+                fname = os.path.join(root, name)
+                with open(fname, "r") as f:
+                    cnt = f.read().format(**data)
+                with open(fname, "w") as f:
+                    f.write(cnt)
+
+        exit()
 
     if target != "build":
         print("Unknown target {}".format(target))
