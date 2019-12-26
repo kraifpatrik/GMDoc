@@ -1,4 +1,6 @@
 /.vscode/
 /env/
 /test/
+__pycache__/
 pip-selfcheck.json
+*.pyc
