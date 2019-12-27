@@ -74,6 +74,32 @@ class BuildTarget(Target):
 
         return flattened
 
+    def parse_resources(self, prefix):
+        parsed = {}
+
+        for root, _, files in os.walk(self.project_dir):
+            for file in files:
+                if not file.startswith(prefix):
+                    continue
+                if file[-4:] != ".gml":
+                    continue
+                fpath = os.path.join(root, file)
+                print("Parsing", fpath)
+                tokens = []
+                with open(fpath) as f:
+                    tokens += tokenize(f)
+                parsed = merge(Parser(tokens).parse(), parsed)
+
+        return parsed
+
+    def flatten_resources(self, parsed):
+        resources = []
+        for _, v in parsed.items():
+            for r in v:
+                resources.append(r)
+        resources.sort(key=lambda r: r["name"])
+        return resources
+
     def execute(self, *args, **kwargs):
         if len(sys.argv) > 2:
             docs_dir = sys.argv[2]
@@ -105,26 +131,8 @@ class BuildTarget(Target):
             template = f.read()
 
         print("Parsing scripting API documentation")
-        parsed = {}
-
-        for root, _, files in os.walk(self.project_dir):
-            for file in files:
-                if not file.startswith(prefix):
-                    continue
-                if file[-4:] != ".gml":
-                    continue
-                fpath = os.path.join(root, file)
-                print("Parsing", fpath)
-                tokens = []
-                with open(fpath) as f:
-                    tokens += tokenize(f)
-                parsed = merge(Parser(tokens).parse(), parsed)
-
-        resources = []
-        for _, v in parsed.items():
-            for r in v:
-                resources.append(r)
-        resources.sort(key=lambda r: r["name"])
+        parsed = self.parse_resources(prefix)
+        resources = self.flatten_resources(parsed)
 
         out_dir = os.path.join(self.docs_src_dir, "ScriptingAPI")
         os.makedirs(out_dir, exist_ok=True)
@@ -136,22 +144,13 @@ class BuildTarget(Target):
 
         for r in resources:
             name = r["name"]
-            _type = r["_type"]
 
-            md = ""
-
-            if _type == "macro":
-                md = macro_to_markdown(r)
-            elif _type == "enum":
-                md = enum_to_markdown(r)
-            elif _type == "script":
-                md = function_to_markdown(r)
-            else:
+            md = resource_to_markdown(r)
+            if md is None:
                 print("Skipping {name} of type {_type}".format(**r))
                 continue
 
             print("Generating Markdown for", name)
-
             fname = os.path.abspath("{}/{}.md".format(out_dir, name))
             with open(fname, "w") as f:
                 f.write(md)

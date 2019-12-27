@@ -263,3 +263,16 @@ def make_pages(meta, flattened, docs_src_dir="", docs_dir="", template="", dates
 
     for k, v in toc.items():
         make_page(k, v, [], [])
+
+
+def resource_to_markdown(r):
+    _type = r["_type"]
+
+    if _type == "macro":
+        return macro_to_markdown(r)
+    elif _type == "enum":
+        return enum_to_markdown(r)
+    elif _type == "script":
+        return function_to_markdown(r)
+    else:
+        return None
