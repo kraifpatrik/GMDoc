@@ -33,10 +33,11 @@ if __name__ == "__main__":
     if target == "init":
         _project = get_input("Project file (*.yyp)")
         _project_name = get_input("Project name")
-        _title = get_input("Document title", _project_name + " Docs")
+        _title = get_input("Document title", default=_project_name + " Docs")
         _author = get_input("Author name")
         _prefix = get_input("Prefix")
         _analytics = get_input("Google Analytics code")
+        _rating_api = get_input("Page rating API URL")
 
         data = {
             "_version": VERSION,
@@ -47,7 +48,7 @@ if __name__ == "__main__":
             "prefix": _prefix,
             "analytics": _analytics,
             "api": {
-                "rating": "/api/page_rating"
+                "rating": _rating_api
             },
             "toc": {}
         }

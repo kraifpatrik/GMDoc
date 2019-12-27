@@ -1,13 +1,25 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>{analytics}
+<head>
+  {% if analytics %}
+  <!-- Global site tag (gtag.js) - Google Analytics -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id={{ analytics }}"></script>
+  <script>
+    if (location.hostname !== 'localhost') {
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){ {dataLayer.push(arguments);} }
+      gtag('js', new Date());
+      gtag('config', '{{ analytics}}');
+    }
+  </script>
+  {% endif %}
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="stylesheet" href="bootstrap-4.3.1-dist/css/bootstrap.min.css">
   <link rel="stylesheet" href="fontawesome-free-5.8.1-web/css/all.min.css">
   <link href="prism.css" rel="stylesheet">
   <link href="style.css" rel="stylesheet">
-  <title>{title}</title>
+  <title>{{ title }}</title>
 </head>
 <body>
   <div class="d-flex flex-column h-100">
@@ -17,20 +29,21 @@
       </button>
       <div class="flex-grow-1 d-flex justify-content-center">
         <a href="./" class="navbar-brand ml-3">
-          {header}
+          {{ header }}
         </a>
       </div>
     </header>
     <div class="d-flex overflow-hidden" style="flex-grow: 1;">
       <aside id="side-menu" class="bg-light border-right overflow-y-auto">
         <ul class="nav flex-column">
-          {menu}
+          {{ menu }}
         </ul>
       </aside>
       <div id="page-wrapper" class="container-fluid overflow-x-auto overflow-y-auto p-0 bg-white">
         <div id="page-content" class="container py-3">
-          {content}
+          {{ content }}
 
+          {% if api_rating %}
           <div id="rating" class="p-1 text-center rounded bg-light">
             Do you find this page helpful?
             <div class="d-flex justify-content-center p-2">
@@ -44,12 +57,13 @@
               </button>
             </div>
           </div>
+          {% endif %}
 
           <div class="d-flex w-100 rounded bg-light align-items-center justify-content-between px-3 mt-3" style="font-size: 3em;">
-            <a href="{link_prev}">
+            <a href="{{ link_prev }}">
               <i class="fas fa-arrow-circle-left text-dark"></i>
             </a>
-            <a href="{link_next}">
+            <a href="{{ link_next }}">
               <i class="fas fa-arrow-circle-right text-dark"></i>
             </a>
           </div>
@@ -58,7 +72,7 @@
 
           <p>
             <small class="text-muted">
-              Copyright &copy; {year}, {author}. Built on {date} using GMDoc.
+              Copyright &copy; {{ year }}, {{ author }}. Built on {{ date }} using GMDoc.
             </small>
           </p>
         </div>
@@ -66,6 +80,7 @@
     </div>
   </div>
 
+  {% if api_rating %}
   <!-- Rating modal -->
   <div class="modal fade" id="mod-rating" tabindex="-1" role="dialog" aria-labelledby="mod-rating-label" aria-hidden="true">
     <div class="modal-dialog shadow" role="document">
@@ -78,7 +93,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <form id="form-rating" action="{api_rating}" method="post">
+        <form id="form-rating" action="{{ api_rating }}" method="post">
           <input type="hidden" name="like" value="0">
           <div class="modal-body">
             <textarea name="message" id="rating-message" class="form-control" rows="3" maxlength="255" placeholder="Please let us know how we could improve this page."></textarea>
@@ -98,6 +113,7 @@
       </div>
     </div>
   </div>
+  {% endif %}
 
   <script src="jquery-3.4.1.min.js"></script>
   <script src="bootstrap-4.3.1-dist/js/bootstrap.bundle.min.js"></script>

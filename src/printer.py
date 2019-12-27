@@ -3,18 +3,7 @@ import os
 import re
 
 import mistune
-
-TEMPLATE_ANALYTICS = """
-  <!-- Global site tag (gtag.js) - Google Analytics -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id={id}"></script>
-  <script>
-    if (location.hostname !== 'localhost') {
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){{dataLayer.push(arguments);}}
-      gtag('js', new Date());
-      gtag('config', '{id}');
-    }
-  </script>"""
+from jinja2 import Template
 
 
 def trim_code(code):
@@ -128,10 +117,6 @@ def macro_to_markdown(macro):
     return template.format(**macro)
 
 
-def format_template(template, tag, value):
-    return template.replace("{" + tag + "}", value)
-
-
 def make_menu(toc, path):
     counter = 0
 
@@ -178,6 +163,7 @@ def make_menu(toc, path):
 
 def make_pages(toc, flattened, docs_src_dir="", docs_dir="", template="", analytics="", title="", author="", datestr="", yearstr="", meta={}):
     flattened_index = 0
+    jinja_template = Template(template)
 
     def make_page(k, v, path, breadcrumb):
         nonlocal flattened_index
@@ -234,24 +220,20 @@ def make_pages(toc, flattened, docs_src_dir="", docs_dir="", template="", analyt
         fname_html = "{}.html".format(fname)
 
         with open(os.path.join(docs_dir, fname_html), "w") as f:
-            fcontent = template
-            fcontent = format_template(template, "analytics", format_template(
-                TEMPLATE_ANALYTICS, "id", analytics) if analytics else "")
-            fcontent = format_template(
-                fcontent, "title", "{}: {}".format(title, k))
-            fcontent = format_template(fcontent, "author", author)
-            fcontent = format_template(fcontent, "header", title)
-            fcontent = format_template(fcontent, "date", datestr)
-            fcontent = format_template(fcontent, "year", yearstr)
-            fcontent = format_template(fcontent, "menu", menu)
-            fcontent = format_template(fcontent, "content", content)
-            fcontent = format_template(fcontent, "page", fname_html)
-            fcontent = format_template(
-                fcontent, "link_prev", link_prev if link_prev is not None else "#")
-            fcontent = format_template(
-                fcontent, "link_next", link_next if link_next is not None else "#")
-            fcontent = format_template(
-                fcontent, "api_rating", meta.get("api", {}).get("rating", ""))
+            fcontent = jinja_template.render(**{
+                "analytics": analytics,
+                "title": "{}: {}".format(title, k),
+                "author": author,
+                "header": title,
+                "date": datestr,
+                "year": yearstr,
+                "menu": menu,
+                "content": content,
+                "page": fname_html,
+                "link_prev": link_prev if link_prev is not None else "#",
+                "link_next": link_next if link_next is not None else "#",
+                "api_rating": meta.get("api", {}).get("rating", ""),
+            })
             f.write(fcontent)
 
         if isfolder and "pages" in v:
