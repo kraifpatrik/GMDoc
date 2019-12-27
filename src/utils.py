@@ -29,6 +29,7 @@ def get_input(text, default=None, end=":"):
             return val
         print("This value is required!")
 
+
 def merge(source, destination):
     for key, l in source.items():
         for i in l:

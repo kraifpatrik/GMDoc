@@ -146,7 +146,7 @@ def make_menu(toc, path):
         counter += 1
         isfolder = isinstance(v, dict)
         fpath = v["file"] if isfolder else v
-        fname, fext = os.path.splitext(os.path.basename(fpath))
+        fname, _ = os.path.splitext(os.path.basename(fpath))
         isinpath = fname in path
         iscurrent = fname == path[-1]
 
@@ -196,7 +196,7 @@ def make_pages(meta, flattened, docs_src_dir="", docs_dir="", template="", dates
     def make_page(k, v, path, breadcrumb):
         nonlocal flattened_index
         link_prev = None if flattened_index == 0 else flattened[flattened_index - 1]
-        link_curr = flattened[flattened_index]
+        # link_curr = flattened[flattened_index]
         link_next = None if flattened_index == len(
             flattened) - 1 else flattened[flattened_index + 1]
         flattened_index += 1

@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 import re
+
 from .tokenizer import Token
+
 
 class Parser:
     def __init__(self, tokens):

@@ -5,6 +5,8 @@ from .utils import get_input
 
 
 class Meta(object):
+    """ Abstraction on gmdoc.json file. """
+
     VERSION = 2
     """ Current version of the gmdoc.json file format. """
 
@@ -107,7 +109,8 @@ class Meta(object):
             ))
 
             _default = "Y/n"
-            _proceed = get_input("Do you want to proceed", default=_default, end="?")
+            _proceed = get_input("Do you want to proceed",
+                                 default=_default, end="?")
 
             if _proceed != _default and _proceed.lower() != "y":
                 raise Exception("Canceled")
