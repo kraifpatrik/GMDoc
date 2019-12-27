@@ -35,7 +35,7 @@ if __name__ == "__main__":
         _project_name = get_input("Project name")
         _title = get_input("Document title", default=_project_name + " Docs")
         _author = get_input("Author name")
-        _prefix = get_input("Prefix")
+        _prefix = get_input("Prefix required for scripts")
         _analytics = get_input("Google Analytics code")
         _rating_api = get_input("Page rating API URL")
 
