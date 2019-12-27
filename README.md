@@ -161,10 +161,10 @@ Entires of "pages" can also be another sections:
       "Section 2": {
         "file": "section_2_source",
         "pages": {
-          "Page withing section 2": "page_source"
+          "Page within section 2": "page_source"
         }
       },
-      "Page withing section 1": "page_source"
+      "Page within section 1": "page_source"
     }
   }
 }
