@@ -131,7 +131,7 @@ It is possible to include custom pages into the documentation by adding a new ke
 ```json
 "toc": {
   "Project Docs": "index.md",
-  "Page title": "path/to/source_file",
+  "Page title": "path/to/source_file"
 }
 ```
 
@@ -145,7 +145,7 @@ It is also possible to compose pages into collapsible sections:
     "file": "path/to/section_file",
     "pages": {
       "Page 1": "path/to/page_1",
-      "Page 2": "path/to/page_2",
+      "Page 2": "path/to/page_2"
     }
   }
 }
@@ -161,9 +161,10 @@ Entires of "pages" can also be another sections:
       "Section 2": {
         "file": "section_2_source",
         "pages": {
+          "Page withing section 2": "page_source"
         }
       },
-      "Page withing section 1": "page_source",
+      "Page withing section 1": "page_source"
     }
   }
 }
