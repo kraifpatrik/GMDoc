@@ -9,6 +9,10 @@ Donate: [PayPal.Me](https://www.paypal.me/kraifpatrik/5usd)
 * [Installation](#installation)
 * [Documenting projects](#documenting-projects)
   - [GMDoc initialization](#gmdoc-initialization)
+  - [Documenting enums](#documenting-enums)
+  - [Documenting macros](#documenting-macros)
+  - [Documenting scripts](#documenting-scripts)
+  - [Custom documentation pages](#custom-documentation-pages)
 * [Building documentation](#building-documentation)
 * [Extras](#extras)
   - [Analytics](#analytics)
@@ -26,6 +30,14 @@ pip3 install -r requirements.txt
 _It is recommended to add `C:\path\to\gmdoc\bin` into your `PATH` to be able to run gmdoc from anywhere._
 
 # Documenting projects
+Each documentation line must start with three forward slashes `///`.
+
+Tag descriptions can be split into multiple lines like so:
+```gml
+/// @tag A very descriptive documentation
+/// that needs to be split into multiple lines.
+```
+
 _GMDoc currently collects documentation only from scripts!_
 
 ## GMDoc initialization
@@ -50,6 +62,63 @@ During the initialization you will be asked to input following values:
 _The values are here in an alphabetical order, the actual order in the command line tool may differ._
 
 After the initialization is done, a `gmdoc.json` file will be created in the project's folder, as well as a new directory `docs_src`, where you can add custom documentation pages.
+
+## Documenting enums
+```gml
+/// @enum Enum description goes here.
+enum EnumName
+{
+    /// @member Enum member description.
+    Some,
+    /// @member Another member description.
+    Member,
+    // This one does not have a description, so it won't occur in the docs.
+    Here,
+};
+```
+
+## Documenting macros
+```gml
+/// @macro {type} Macro description goes here.
+#macro MACRO_NAME macro_value
+```
+
+_The macro type can be omitted._
+
+## Documenting scripts
+```gml
+/// @func script_name(arg1[, arg2])
+/// @desc Script description goes here.
+/// @param {type} arg1 Argument description.
+/// @param {type} [arg2] Optional argument description.
+/// @return {type} Return value description.
+/// @example You can write example code using Markdown like this:
+/// ```gml
+/// // Example code goes here...
+/// ```
+/// @note A note to the scripts usage or implementation for example.
+/// @source https://url.to/the/original/implementation
+/// @see another_script
+/// @see AnEnum
+/// @see OR_A_MACRO
+```
+
+_All tags except `@func` are optional. Parameter and return value types can be omitted._
+
+You may want to improve readability of your script documentation comments by indenting descriptions with spaces and putting `///` lines inbetween parts with dense text like so:
+
+```gml
+/// @func script_name(arg, anotherArg)
+/// @desc Script description here.
+///
+/// @param {type} arg        Argument description here.
+/// @param {type} anotherArg Another argument description here.
+///
+/// @return {type} Return value description here.
+```
+
+## Custom documentation pages
+TODO
 
 # Building documentation
 To build an HTML documentation, simply run the following command from your project's directory:
