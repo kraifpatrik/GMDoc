@@ -26,7 +26,7 @@ $(function () {
   });
 
   $('[data-like]').on('click', function () {
-    $('input[name="like"]').val($(this).attr('data-like'));
+    $('input[name="like"]').val(parseInt($(this).attr('data-like')));
   });
 
   $('.char-count').each(function () {
