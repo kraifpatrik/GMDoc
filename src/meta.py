@@ -107,7 +107,9 @@ class Meta(object):
             ))
 
             _default = "Y/n"
-            if get_input("Do you want to proceed", default=_default, end="?") != _default:
+            _proceed = get_input("Do you want to proceed", default=_default, end="?")
+
+            if _proceed != _default and _proceed.lower() != "y":
                 raise Exception("Canceled")
 
             meta_new = Meta.new(meta)

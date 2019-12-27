@@ -63,6 +63,21 @@ class InitTarget(Target):
 
 
 class BuildTarget(Target):
+    def flatten_toc(self, toc):
+        flattened = []
+
+        def get_name(v):
+            return os.path.splitext(os.path.basename(v))[0] + ".html"
+
+        for _, v in toc.items():
+            if isinstance(v, dict):
+                flattened.append(get_name(v["file"]))
+                flattened += self.flatten_toc(v.get("pages", {}))
+            else:
+                flattened.append(get_name(v))
+
+        return flattened
+
     def execute(self, *args, **kwargs):
         if len(sys.argv) > 2:
             docs_dir = sys.argv[2]
@@ -149,24 +164,9 @@ class BuildTarget(Target):
 
         toc["Scripting API"] = scripting_api_toc
 
-        def flatten_toc(toc):
-            flattened = []
-
-            def get_name(v):
-                return os.path.splitext(os.path.basename(v))[0] + ".html"
-
-            for k, v in toc.items():
-                if isinstance(v, dict):
-                    flattened.append(get_name(v["file"]))
-                    flattened += flatten_toc(v.get("pages", {}))
-                else:
-                    flattened.append(get_name(v))
-
-            return flattened
-
         make_pages(
             meta,
-            flatten_toc(toc),
+            self.flatten_toc(toc),
             docs_src_dir=self.docs_src_dir,
             docs_dir=docs_dir,
             template=template,
