@@ -20,32 +20,46 @@ def add_bootstrap(code, table_class=""):
 
 
 def function_to_markdown(fn):
-    template = ("# {name}\n"
-                "`script`\n"
-                "```gml\n"
-                "{signature}\n"
-                "```")
+    template = (
+        "# {name}\n"
+        "`script`\n"
+        "```gml\n"
+        "{signature}\n"
+        "```"
+    )
 
-    template_desc = ("## Description\n"
-                     "{desc}")
+    template_desc = (
+        "## Description\n"
+        "{desc}"
+    )
 
-    template_header = ("### Arguments\n"
-                       "| Name | Type | Description |\n"
-                       "| ---- | ---- | ----------- |\n")
+    template_header = (
+        "### Arguments\n"
+        "| Name | Type | Description |\n"
+        "| ---- | ---- | ----------- |\n"
+    )
 
     template_row = "| {name} | `{type}` | {desc} |"
 
-    template_return = ("## Returns\n"
-                       "`{type}` {desc}")
+    template_return = (
+        "## Returns\n"
+        "`{type}` {desc}"
+    )
 
-    template_example = ("## Example\n"
-                        "{example}")
+    template_example = (
+        "## Example\n"
+        "{example}"
+    )
 
-    template_note = ("## Note\n"
-                     "{note}")
+    template_note = (
+        "## Note\n"
+        "{note}"
+    )
 
-    template_source = ("## Source\n"
-                       "{source}")
+    template_source = (
+        "## Source\n"
+        "{source}"
+    )
 
     content = []
     content.append(template.format(**fn))
@@ -83,14 +97,18 @@ def function_to_markdown(fn):
 
 
 def enum_to_markdown(en):
-    template = ("# {name}\n"
-                "`enum`\n"
-                "## Description\n"
-                "{desc}")
+    template = (
+        "# {name}\n"
+        "`enum`\n"
+        "## Description\n"
+        "{desc}"
+    )
 
-    template_header = ("### Members\n"
-                       "| Name | Description |\n"
-                       "| ---- | ----------- |\n")
+    template_header = (
+        "### Members\n"
+        "| Name | Description |\n"
+        "| ---- | ----------- |\n"
+    )
 
     template_row = "| `{name}` | {desc} |"
 
@@ -110,10 +128,13 @@ def enum_to_markdown(en):
 
 
 def macro_to_markdown(macro):
-    template = ("# {name}\n"
-                "`macro`\n"
-                "## Description\n"
-                "`{type}` {desc}")
+    template = (
+        "# {name}\n"
+        "`macro`\n"
+        "## Description\n"
+        "`{type}` {desc}"
+    )
+
     return template.format(**macro)
 
 
@@ -161,9 +182,16 @@ def make_menu(toc, path):
     return menu
 
 
-def make_pages(toc, flattened, docs_src_dir="", docs_dir="", template="", analytics="", title="", author="", datestr="", yearstr="", meta={}):
+def make_pages(meta, flattened, docs_src_dir="", docs_dir="", template="", datestr="", yearstr=""):
+    toc = meta.toc
+
     flattened_index = 0
     jinja_template = Template(template)
+
+    data = meta.serialize()
+    data["header"] = meta.title
+    data["date"] = datestr
+    data["year"] = yearstr
 
     def make_page(k, v, path, breadcrumb):
         nonlocal flattened_index
@@ -220,20 +248,13 @@ def make_pages(toc, flattened, docs_src_dir="", docs_dir="", template="", analyt
         fname_html = "{}.html".format(fname)
 
         with open(os.path.join(docs_dir, fname_html), "w") as f:
-            fcontent = jinja_template.render(**{
-                "analytics": analytics,
-                "title": "{}: {}".format(title, k),
-                "author": author,
-                "header": title,
-                "date": datestr,
-                "year": yearstr,
-                "menu": menu,
-                "content": content,
-                "page": fname_html,
-                "link_prev": link_prev if link_prev is not None else "#",
-                "link_next": link_next if link_next is not None else "#",
-                "api_rating": meta.get("api", {}).get("rating", ""),
-            })
+            data["menu"] = menu
+            data["title"] = "{}: {}".format(meta.title, k)
+            data["content"] = content
+            data["page"] = fname_html
+            data["link_prev"] = link_prev if link_prev is not None else "#"
+            data["link_next"] = link_next if link_next is not None else "#"
+            fcontent = jinja_template.render(**data)
             f.write(fcontent)
 
         if isfolder and "pages" in v:

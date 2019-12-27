@@ -72,7 +72,8 @@
 
           <p>
             <small class="text-muted">
-              Copyright &copy; {{ year }}, {{ author }}. Built on {{ date }} using GMDoc.
+              Copyright &copy; {{ year }}, {{ author }}. Built on {{ date }} using
+              <a href="https://github.com/kraifpatrik/gmdoc">GMDoc</a>.
             </small>
           </p>
         </div>
@@ -80,7 +81,7 @@
     </div>
   </div>
 
-  {% if api_rating %}
+  {% if api['rating'] %}
   <!-- Rating modal -->
   <div class="modal fade" id="mod-rating" tabindex="-1" role="dialog" aria-labelledby="mod-rating-label" aria-hidden="true">
     <div class="modal-dialog shadow" role="document">
@@ -93,7 +94,7 @@
             <span aria-hidden="true">&times;</span>
           </button>
         </div>
-        <form id="form-rating" action="{{ api_rating }}" method="post">
+        <form id="form-rating" action="{{ api['rating'] }}" method="post">
           <input type="hidden" name="like" value="0">
           <div class="modal-body">
             <textarea name="message" id="rating-message" class="form-control" rows="3" maxlength="255" placeholder="Please let us know how we could improve this page."></textarea>

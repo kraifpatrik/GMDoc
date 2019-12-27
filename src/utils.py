@@ -16,15 +16,18 @@ def copytree(src, dst, symlinks=False, ignore=None):
             shutil.copy2(s, d)
 
 
-def get_input(text, default=""):
-    if default:
+def get_input(text, default=None, end=":"):
+    if default is not None:
         text += " [{}]".format(default)
-    text += ": "
-    val = input(text)
-    if not val:
-        return default
-    return val
+    text += "{} ".format(end)
 
+    while True:
+        val = input(text).strip()
+        if not val and default is not None:
+            return default
+        if val:
+            return val
+        print("This value is required!")
 
 def merge(source, destination):
     for key, l in source.items():

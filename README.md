@@ -61,7 +61,7 @@ During the initialization you will be asked to input following values:
 
 _The values are here in an alphabetical order, the actual order in the command line tool may differ._
 
-After the initialization is done, a `gmdoc.json` file will be created in the project's folder, as well as a new directory `docs_src`, where you can add custom documentation pages.
+After the initialization is done, a `gmdoc.json` file will be created in the project's folder, as well as a new directory `docs_src`, where you can add [custom documentation pages](#custom-documentation-pages).
 
 ## Documenting enums
 ```gml
