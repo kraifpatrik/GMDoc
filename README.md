@@ -17,6 +17,7 @@ Donate: [PayPal.Me](https://www.paypal.me/kraifpatrik/5usd)
 * [Extras](#extras)
   - [Analytics](#analytics)
   - [Page rating API](#page-rating-api)
+* [Projects using GMDoc](#projects-using-gmdoc)
 
 # Installation
 * Requires [Python 3](https://www.python.org)
@@ -206,3 +207,7 @@ $stmt->bindParam(":like", $like);
 $stmt->bindParam(":message", $message);
 $stmt->execute();
 ```
+
+# Projects using GMDoc
+* [CE](https://kraifpatrik.com/docs/ce)
+* Your project here?
