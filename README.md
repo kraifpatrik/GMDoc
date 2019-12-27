@@ -8,6 +8,7 @@ Donate: [PayPal.Me](https://www.paypal.me/kraifpatrik/5usd)
 # Table of Contents
 * [Installation](#installation)
 * [Documenting projects](#documenting-projects)
+  - [GMDoc initialization](#gmdoc-initialization)
 * [Building documentation](#building-documentation)
 * [Extras](#extras)
   - [Analytics](#analytics)
@@ -25,7 +26,30 @@ pip3 install -r requirements.txt
 _It is recommended to add `C:\path\to\gmdoc\bin` into your `PATH` to be able to run gmdoc from anywhere._
 
 # Documenting projects
-TODO
+_GMDoc currently collects documentation only from scripts!_
+
+## GMDoc initialization
+To generate a documentation you first have to initialize GMDoc in the project's directory using
+
+```cmd
+gmdoc init
+```
+
+During the initialization you will be asked to input following values:
+
+| Value | Description |
+| ----- |------------ |
+| Author name | Used in the copyright notice. |
+| Document title | The title of the documentation. This is by default equal to `project_name + ' Docs'`. |
+| Google Analytics code | Optional. See [Analytics](#analytics) for more info. |
+| Page rating API URL | Optional. See [Page rating API](#page-rating-api) for more info. |
+| Prefix required for scripts | Optional. If provided, documentation will be collected only from scripts starting with the prefix. |
+| Project file | The name of your *.yyp project file. |
+| Project name | The name of your project. |
+
+_The values are here in an alphabetical order, the actual order in the command line tool may differ._
+
+After the initialization is done, a `gmdoc.json` file will be created in the project's folder, as well as a new directory `docs_src`, where you can add custom documentation pages.
 
 # Building documentation
 To build an HTML documentation, simply run the following command from your project's directory:
