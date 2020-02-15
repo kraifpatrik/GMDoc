@@ -36,6 +36,11 @@ def tokenize(f):
     is_comment = False
 
     for line in f:
+        # Ignore all / comment lines
+        m = re.match(r"\s*(/){4,}\s*", line)
+        if m:
+            continue
+
         m = re.match(r"(.*)///([\s\S]*)", line)
 
         # Line does not have any documentation comments
