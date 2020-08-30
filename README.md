@@ -209,5 +209,6 @@ $stmt->execute();
 ```
 
 # Projects using GMDoc
+* [BBMOD](https://github.com/blueburn-cz/BBMOD)
 * [CE](https://kraifpatrik.com/docs/ce)
 * Your project here?
