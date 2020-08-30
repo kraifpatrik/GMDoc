@@ -4,3 +4,14 @@
 __pycache__/
 pip-selfcheck.json
 *.pyc
+
+#GMDoc
+/docs_build
+/gmdoc.json
+
+# GameMaker
+/datafiles/
+/options/
+/rooms/
+/scripts/
+/gmdoc.yyp
