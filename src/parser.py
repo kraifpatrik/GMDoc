@@ -234,6 +234,7 @@ class Parser:
         see = []
         note = ""
         source = ""
+        throws = []
 
         while True:
             _desc = self._parse_function_desc()
@@ -269,6 +270,11 @@ class Parser:
             _source = self._parse_function_source()
             if _source:
                 source = _source
+                continue
+
+            _throws = self._parse_throws()
+            if _throws:
+                throws.append(_throws)
                 continue
 
             break
@@ -441,8 +447,39 @@ class Parser:
             self._next()
 
         return desc.strip()
+    
+    def _parse_throws(self):
+        t = self._peek()
+        if not t.is_tag("throws"):
+            return None
+        self._next()
 
-    def parse(self):
+        # Type
+        t = self._peek()
+        type_ = None
+        if t.type == Token.Type.TYPE:
+            type_ = t.value
+            self._next()
+
+        # Description
+        desc = ""
+        while True:
+            t = self._peek()
+            if t.type != Token.Type.COMMENT:
+                break
+            desc += t.value + " "
+            self._next()
+        desc = desc.strip()
+
+        if type_ or desc:
+            return {
+                "desc": desc,
+                "type": type_
+            }
+
+        return None
+
+    def parse(self, prefix=""):
         enums = []
         functions = []
         macros = []
@@ -454,22 +491,26 @@ class Parser:
 
             _enum = self._parse_enum()
             if _enum:
-                enums.append(_enum)
+                if _enum["name"].lower().startswith(prefix.lower()):
+                    enums.append(_enum)
                 continue
 
             _fn = self._parse_function()
             if _fn:
-                functions.append(_fn)
+                if _fn["name"].lower().startswith(prefix.lower()):
+                    functions.append(_fn)
                 continue
 
             _macro = self._parse_macro()
             if _macro:
-                macros.append(_macro)
+                if _macro["name"].lower().startswith(prefix.lower()):
+                    macros.append(_macro)
                 continue
 
             _var = self._parse_var()
             if _var:
-                variables.append(_var)
+                if _var["name"].lower().startswith(prefix.lower()):
+                    variables.append(_var)
                 continue
 
             break

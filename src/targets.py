@@ -88,7 +88,7 @@ class BuildTarget(Target):
                 tokens = []
                 with open(fpath) as f:
                     tokens += tokenize(f)
-                parsed = merge(Parser(tokens).parse(), parsed)
+                parsed = merge(Parser(tokens).parse(prefix), parsed)
 
         return parsed
 
