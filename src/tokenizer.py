@@ -3,100 +3,114 @@ import re
 from enum import Enum
 
 
-class Token:
-    class Type(Enum):
-        COMMENT_START = 0
-        TAG = 1
-        TYPE = 2
-        COMMENT = 3
-        COMMENT_END = 4
-        CODE = 5
-        EOF = 6
+class TokenizationError(Exception):
+    pass
 
-    def __init__(self, value, type_):
-        self.value = value
-        self.type = type_
+
+class Token(object):
+    class Type(Enum):
+        BOOL = 0
+        COMMENT = 1
+        DELIMITER = 2
+        EOF = 3
+        KEYWORD = 4
+        MACRO = 5
+        NAME = 6
+        NEWLINE = 7
+        NUMBER = 8
+        STRING = 9
+        UNDEFINED = 10
+        WHITESPACE = 11
+
+    def __init__(self, _value: str, _type: int, _at: int, _len: int):
+        self.value = _value
+        self.type = _type
+        self.at = _at
+        self.len = _len
 
     def __repr__(self):
-        return "<{}, {}>".format(repr(self.value), self.type)
-
-    def is_tag(self, name):
-        return self.type == Token.Type.TAG and self.value == name
-
-
-def string_char_at(string, idx):
-    try:
-        return string[idx]
-    except:
-        return ""
+        return "<{}, {}, {}, {}>".format(
+            repr(self.value),
+            self.type,
+            self.at,
+            self.len)
 
 
-def tokenize(f):
-    tokens = []
-    is_comment = False
+RESERVED = {
+    "all": Token.Type.KEYWORD,
+    "begin": Token.Type.KEYWORD,
+    "break": Token.Type.KEYWORD,
+    "case": Token.Type.KEYWORD,
+    "catch": Token.Type.KEYWORD,
+    "constructor": Token.Type.KEYWORD,
+    "continue": Token.Type.KEYWORD,
+    "delete": Token.Type.KEYWORD,
+    "div": Token.Type.KEYWORD,
+    "do": Token.Type.KEYWORD,
+    "else": Token.Type.KEYWORD,
+    "end": Token.Type.KEYWORD,
+    "enum": Token.Type.KEYWORD,
+    "exit": Token.Type.KEYWORD,
+    "finally": Token.Type.KEYWORD,
+    "for": Token.Type.KEYWORD,
+    "function": Token.Type.KEYWORD,
+    "if": Token.Type.KEYWORD,
+    "mod": Token.Type.KEYWORD,
+    "new": Token.Type.KEYWORD,
+    "noone": Token.Type.KEYWORD,
+    "other": Token.Type.KEYWORD,
+    "repeat": Token.Type.KEYWORD,
+    "return": Token.Type.KEYWORD,
+    "self": Token.Type.KEYWORD,
+    "switch": Token.Type.KEYWORD,
+    "throw": Token.Type.KEYWORD,
+    "try": Token.Type.KEYWORD,
+    "var": Token.Type.KEYWORD,
+    "while": Token.Type.KEYWORD,
+}
 
-    for line in f:
-        # Ignore all / comment lines
-        m = re.match(r"\s*(/){4,}\s*", line)
-        if m:
-            continue
 
-        m = re.match(r"(.*)///([\s\S]*)", line)
+class Tokenizer(object):
+    def tokenize(self, _code: str):
+        tokens = []
+        at = 0
 
-        # Line does not have any documentation comments
-        if not m:
-            # Insert comment end tag
-            if is_comment:
-                tokens.append(Token("", Token.Type.COMMENT_END))
-                is_comment = False
-            # Append code
-            line = line.rstrip()
-            tokens.append(Token(line, Token.Type.CODE))
-            continue
+        def get_token(_regex, _type):
+            m = re.match(_regex, _code, flags=re.IGNORECASE)
+            if m:
+                _start = m.start(0)
+                _len = m.end(0)
+                token = Token(m.group(0), _type, at + _start, _len - _start)
+                return token
+            return None
 
-        # Part before the comment start
-        rest = m.group(1)
-        if rest:
-            tokens.append(Token(rest, Token.Type.CODE))
+        while _code:
+            token = None
 
-        # Insert comment start tag
-        if not is_comment:
-            tokens.append(Token("", Token.Type.COMMENT_START))
-            is_comment = True
+            for k, v in RESERVED.items():
+                token = get_token(r"^" + k + r"\b", v)
+                if token:
+                    break
 
-        # Split comment at tags
-        comment = m.group(2)[1:]
-        tokenized = [t for t in re.split(r"(@\w+)", comment)]
-        tokenized = list(
-            filter(lambda t: True if t.strip() else None, tokenized))
+            if not token:
+                token = (get_token(r"^#macro\b", Token.Type.MACRO) or
+                        get_token(r"^\/\*[\s\S]*\*\/", Token.Type.COMMENT) or
+                        get_token(r"^\/\/+[^\n]*", Token.Type.COMMENT) or
+                        get_token(r"^[a-z_][a-z0-9_]*", Token.Type.NAME) or
+                        get_token(r"^\d+\.?\d*|\.\d+", Token.Type.NUMBER) or
+                        get_token(r"^\$[a-f0-9]+", Token.Type.NUMBER) or
+                        get_token(r"^@\"(\\\"|[^\"])*\"", Token.Type.STRING) or
+                        get_token(r"^\"(\\\"|[^\"\n])*\"", Token.Type.STRING) or
+                        get_token(r"^\n", Token.Type.NEWLINE) or
+                        get_token(r"^\s+", Token.Type.WHITESPACE) or
+                        get_token(r"^[~!@#$%^&*()-_=+[\]{};:,<.>/?|]", Token.Type.DELIMITER))
 
-        # Turn into tokens
-        i = len(tokenized) - 1
-        while i >= 0:
-            token = tokenized[i]
-            m = re.match(r"\s*\{\s*([^}]+)\s*\}([\s\S]*)", token)
+            if token:
+                tokens.append(token)
+                _code = _code[token.len:]
+                at += token.len
+            else:
+                raise TokenizationError()
+        tokens.append(Token("", Token.Type.EOF, at, 0))
 
-            if not m:
-                if string_char_at(token, 0) == "@":
-                    tokenized[i] = Token(token[1:], Token.Type.TAG)
-                else:
-                    tokenized[i] = Token(token, Token.Type.COMMENT)
-                i -= 1
-                continue
-
-            tokenized[i] = Token(m.group(1), Token.Type.TYPE)
-            tokenized.insert(
-                i + 1, Token(m.group(2).lstrip(), Token.Type.COMMENT))
-            i -= 1
-
-        tokens += tokenized
-
-    # Insert comment end tag (in case it's not followed by any code, just for consistency)
-    if is_comment:
-        tokens.append(Token("", Token.Type.COMMENT_END))
-        is_comment = False
-
-    # Add end of file token
-    tokens.append(Token("", Token.Type.EOF))
-
-    return tokens
+        return tokens

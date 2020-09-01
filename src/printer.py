@@ -22,7 +22,7 @@ def add_bootstrap(code, table_class=""):
 def function_to_markdown(fn):
     template = (
         "# {name}\n"
-        "`script`\n"
+        "`function`\n"
         "```gml\n"
         "{signature}\n"
         "```"
@@ -272,7 +272,7 @@ def resource_to_markdown(r):
         return macro_to_markdown(r)
     elif _type == "enum":
         return enum_to_markdown(r)
-    elif _type == "script":
+    elif _type == "function":
         return function_to_markdown(r)
     else:
         return None

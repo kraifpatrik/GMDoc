@@ -6,6 +6,7 @@ pip-selfcheck.json
 *.pyc
 
 #GMDoc
+/docs_src/ScriptingAPI
 /docs_build
 /gmdoc.json
 
