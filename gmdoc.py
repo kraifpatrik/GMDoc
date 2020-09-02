@@ -4,15 +4,16 @@
 import sys
 from src.parser import Parser
 from src.tokenizer import Tokenizer
+from pprint import pprint
 
 if __name__ == "__main__":
     with open(sys.argv[1], "r") as f:
         tokenizer = Tokenizer()
         tokens = tokenizer.tokenize(f.read())
-        print(tokens)
+        pprint(tokens)
         parser = Parser(tokens)
         parsed = parser.parse()
-        print(parsed)
+        pprint(parsed)
     exit()
 
 import os
