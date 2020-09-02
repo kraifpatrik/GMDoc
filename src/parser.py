@@ -73,6 +73,7 @@ class Documentation(object):
         _str = _str.replace("///", "")
 
         while True:
+            # Tag
             m = re.match(r"\s*@([a-z]+)", _str)
             if not m:
                 break
@@ -81,6 +82,7 @@ class Documentation(object):
             print("Tag", tag)
             _str = _str[m.end(0):]
 
+            # Optional type
             m = re.match(r"\s*\{([^\}]*)\}", _str)
             if m:
                 typestr = m.group(1)
@@ -89,6 +91,7 @@ class Documentation(object):
             else:
                 typestr = None
 
+            # Param name
             name = None
             if tag == "param":
                 m = re.match(r"\s*\[?([a-z_]+[a-z0-9_]*)\]?", _str, flags=re.IGNORECASE)
@@ -97,11 +100,20 @@ class Documentation(object):
                     print("Name", name)
                     _str = _str[m.end(0):]
 
+            # Description
             s = re.search(r"@[a-z]+", _str)
             end = s.start(0) if s else len(_str)
             desc = _str[:end].strip()
 
-            print("Desc", desc)
+            # Handle markdown code
+            split = desc.split("```")
+            for i in range(len(split)):
+                if i % 2:
+                    split[i] = re.sub(r"\n ", "\n", split[i])
+                else:
+                    split[i] = "\n" + re.sub(r"\s+", " ", split[i]).strip() + "\n"
+            desc = "```".join(split).strip()
+            print(desc)
 
             _str = _str[end:]
 
