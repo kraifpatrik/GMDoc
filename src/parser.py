@@ -4,7 +4,28 @@ import re
 from .tokenizer import Token
 
 
-class Scope(object):
+class Entity(object):
+    def __init__(self, _name=""):
+        self.name = _name
+        self.parent = None
+        self.docs = None
+
+
+class Macro(Entity):
+    pass
+
+
+class Member(Entity):
+    pass
+
+
+class Variable(Entity):
+    def __init__(self, _name=""):
+        super(Variable, self).__init__(_name)
+        self.is_global = False
+
+
+class Scope(Entity):
     def __init__(self, _name=""):
         self.name = _name
         self.parent = None
@@ -15,12 +36,13 @@ class Scope(object):
         self.children.append(child)
 
     def __repr__(self):
-        def _print(scope, indent):
+        def _print(entity, indent):
             s = (" " * indent * 4) + "* " + \
-                (scope.name if scope.name else "<anonymous>") + \
-                " ({})\n".format(type(scope).__name__)
-            for c in scope.children:
-                s += _print(c, indent + 1)
+                (entity.name if entity.name else "<anonymous>") + \
+                " ({})\n".format(type(entity).__name__)
+            if isinstance(entity, Scope):
+                for c in entity.children:
+                    s += _print(c, indent + 1)
             return s
         return _print(self, 0)
 
@@ -127,8 +149,14 @@ class Parser(object):
         while self.available():
             token = self.peek()
 
+            # Macros
+            if token.type == Token.Type.MACRO:
+                self.next()
+                name = self.consume(_type=Token.Type.NAME)
+                current.add_child(Macro(_name=name.value))
+
             # Enums
-            if token.type == Token.Type.ENUM:
+            elif token.type == Token.Type.ENUM:
                 self.next()
                 name = self.consume(_type=Token.Type.NAME)
                 if self.consume(_type=Token.Type.BRACKET_CURLY_LEFT):
@@ -136,16 +164,40 @@ class Parser(object):
                     current.add_child(enum)
                     current = enum
 
-            # Anonymous functions assigned to variables
+            # Global variables
+            elif token.type == Token.Type.GLOBAL:
+                self.next()
+                self.consume(_type=Token.Type.DOT)
+                name = self.consume(_type=Token.Type.NAME)
+                variable = Variable(_name=name.value)
+                variable.is_global = True
+                current.add_child(variable)
+
+            # Variables and names
             elif token.type == Token.Type.NAME:
                 self.next()
+
+                # Variable assignments
                 if self.consume(_type=Token.Type.EQUALS):
+
+                    # Functions
                     function = self._parse_function()
                     if function:
                         if not function.name:
                             function.name = token.value
                         current.add_child(function)
                         current = function
+                        continue
+
+                    # Other
+                    if isinstance(current, Constructor):
+                        current.add_child(Variable(_name=token.value))
+                        continue
+
+                # Enum members
+                if isinstance(current, Enum):
+                    current.add_child(Member(_name=token.value))
+                    continue
 
             # Named functions
             elif token.type == Token.Type.FUNCTION:
