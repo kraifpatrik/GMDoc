@@ -5,10 +5,10 @@ from .tokenizer import Token
 
 
 class Entity(object):
-    def __init__(self, _name=""):
+    def __init__(self, _name="", _docs=None):
         self.name = _name
         self.parent = None
-        self.docs = None
+        self.docs = _docs
 
 
 class Macro(Entity):
@@ -20,15 +20,14 @@ class Member(Entity):
 
 
 class Variable(Entity):
-    def __init__(self, _name=""):
-        super(Variable, self).__init__(_name)
+    def __init__(self, **kwargs):
+        super(Variable, self).__init__(**kwargs)
         self.is_global = False
 
 
 class Scope(Entity):
-    def __init__(self, _name=""):
-        self.name = _name
-        self.parent = None
+    def __init__(self, **kwargs):
+        super(Scope, self).__init__(**kwargs)
         self.children = []
 
     def add_child(self, child):
@@ -38,6 +37,7 @@ class Scope(Entity):
     def __repr__(self):
         def _print(entity, indent):
             s = (" " * indent * 4) + "* " + \
+                ("[" + entity.docs.str + "] " if entity.docs else "") + \
                 (entity.name if entity.name else "<anonymous>") + \
                 " ({})\n".format(type(entity).__name__)
             if isinstance(entity, Scope):
@@ -64,7 +64,15 @@ class Enum(Scope):
 
 
 class Documentation(object):
-    pass
+    def __init__(self):
+        pass
+
+    @staticmethod
+    def from_string(_str):
+        docs = Documentation()
+        # TODO: Parse docs
+        docs.str = _str.replace("///", "").replace("\n", " ")
+        return docs
 
 
 class Parser(object):
@@ -145,24 +153,40 @@ class Parser(object):
     def parse(self, prefix=""):
         script = Script()
         current = script
+        documentation = None
 
         # TODO: Error handling!
 
         while self.available():
             token = self.peek()
 
+            # Documentation
+            if token.type == Token.Type.DOCUMENTATION:
+                docstr = ""
+                while True:
+                    docs = self.consume(
+                        _type=Token.Type.DOCUMENTATION, _ignore_comments=False)
+                    if docs:
+                        docstr += docs.value + "\n"
+                    else:
+                        documentation = Documentation.from_string(docstr)
+                        break
+
             # Macros
-            if token.type == Token.Type.MACRO:
+            elif token.type == Token.Type.MACRO:
                 self.next()
                 name = self.consume(_type=Token.Type.NAME)
-                current.add_child(Macro(_name=name.value))
+                macro = Macro(_name=name.value, _docs=documentation)
+                documentation = None
+                current.add_child(macro)
 
             # Enums
             elif token.type == Token.Type.ENUM:
                 self.next()
                 name = self.consume(_type=Token.Type.NAME)
                 if self.consume(_type=Token.Type.BRACKET_CURLY_LEFT):
-                    enum = Enum(_name=name.value)
+                    enum = Enum(_name=name.value, _docs=documentation)
+                    documentation = None
                     current.add_child(enum)
                     current = enum
 
@@ -171,7 +195,8 @@ class Parser(object):
                 self.next()
                 self.consume(_type=Token.Type.DOT)
                 name = self.consume(_type=Token.Type.NAME)
-                variable = Variable(_name=name.value)
+                variable = Variable(_name=name.value, _docs=documentation)
+                documentation = None
                 variable.is_global = True
                 current.add_child(variable)
 
@@ -185,6 +210,8 @@ class Parser(object):
                     # Functions
                     function = self._parse_function(_method=True)
                     if function:
+                        function.docs = documentation
+                        documentation = None
                         if not function.name:
                             function.name = token.value
                         current.add_child(function)
@@ -193,18 +220,24 @@ class Parser(object):
 
                     # Other
                     if isinstance(current, Constructor):
-                        current.add_child(Variable(_name=token.value))
+                        variable = Variable(_name=token.value, _docs=documentation)
+                        documentation = None
+                        current.add_child(variable)
                         continue
 
                 # Enum members
                 if isinstance(current, Enum):
-                    current.add_child(Member(_name=token.value))
+                    member = Member(_name=token.value, _docs=documentation)
+                    documentation = None
+                    current.add_child(member)
                     continue
 
             # Named functions
             elif token.type == Token.Type.FUNCTION:
                 function = self._parse_function()
                 if function:
+                    function.docs = documentation
+                    documentation = None
                     current.add_child(function)
                     current = function
 
