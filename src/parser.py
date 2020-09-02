@@ -55,7 +55,7 @@ class Function(Scope):
     pass
 
 
-class Constructor(Scope):
+class Constructor(Function):
     pass
 
 
@@ -117,7 +117,7 @@ class Parser(object):
         self.reset(mark)
         return None
 
-    def _parse_function(self):
+    def _parse_function(self, _method=False):
         # TODO: Mark and reset on errors
 
         if not self.consume(_type=Token.Type.FUNCTION):
@@ -181,7 +181,7 @@ class Parser(object):
                 if self.consume(_type=Token.Type.EQUALS):
 
                     # Functions
-                    function = self._parse_function()
+                    function = self._parse_function(_method=True)
                     if function:
                         if not function.name:
                             function.name = token.value

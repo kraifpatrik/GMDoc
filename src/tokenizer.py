@@ -34,6 +34,7 @@ class Token(object):
         DELETE = auto()
         DIV = auto()
         DO = auto()
+        DOCUMENTATION = auto()
         DOLLAR = auto()
         DOT = auto()
         ELSE = auto()
@@ -198,6 +199,7 @@ class Tokenizer(object):
 
             if not token:
                 token = (get_token(r"^#macro\b", Token.Type.MACRO) or
+                         get_token(r"^\/{3}[^\n]*", Token.Type.DOCUMENTATION) or
                          get_token(r"^\/\*[\s\S]*\*\/", Token.Type.COMMENT) or
                          get_token(r"^\/\/+[^\n]*", Token.Type.COMMENT) or
                          get_token(r"^[a-z_][a-z0-9_]*", Token.Type.NAME) or
@@ -207,6 +209,10 @@ class Tokenizer(object):
                          get_token(r"^\"(\\\"|[^\"\n])*\"", Token.Type.STRING) or
                          get_token(r"^\r?\n", Token.Type.NEWLINE) or
                          get_token(r"^\s+", Token.Type.WHITESPACE))
+
+                if token and token.type == Token.Type.DOCUMENTATION:
+                    if re.match(r"^\/{4,}$", token.value):
+                        token.type = Token.Type.COMMENT
 
             if not token:
                 for k, v in DELIMITERS.items():
