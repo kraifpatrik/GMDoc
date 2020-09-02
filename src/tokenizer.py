@@ -13,7 +13,7 @@ class Token(object):
         AMPERSAND = auto()
         ASTERISK = auto()
         AT = auto()
-        BEGIN = auto()
+        # BEGIN = auto()
         BOOL = auto()
         BRACKET_CURLY_LEFT = auto()
         BRACKET_CURLY_RIGHT = auto()
@@ -37,7 +37,7 @@ class Token(object):
         DOLLAR = auto()
         DOT = auto()
         ELSE = auto()
-        END = auto()
+        # END = auto()
         ENUM = auto()
         EOF = auto()
         EQUALS = auto()
@@ -71,6 +71,7 @@ class Token(object):
         SELF = auto()
         SEMICOLON = auto()
         SLASH = auto()
+        STATIC = auto()
         STRING = auto()
         SWITCH = auto()
         THROW = auto()
@@ -103,7 +104,7 @@ class Token(object):
 
 RESERVED = {
     "all": Token.Type.ALL,
-    "begin": Token.Type.BEGIN,
+    "begin": Token.Type.BRACKET_LEFT,  # Token.Type.BEGIN
     "break": Token.Type.BREAK,
     "case": Token.Type.CASE,
     "catch": Token.Type.CATCH,
@@ -114,7 +115,7 @@ RESERVED = {
     "div": Token.Type.DIV,
     "do": Token.Type.DO,
     "else": Token.Type.ELSE,
-    "end": Token.Type.END,
+    "end": Token.Type.BRACKET_RIGHT,  # Token.Type.END
     "enum": Token.Type.ENUM,
     "exit": Token.Type.EXIT,
     "false": Token.Type.FALSE,
@@ -130,6 +131,7 @@ RESERVED = {
     "repeat": Token.Type.REPEAT,
     "return": Token.Type.RETURN,
     "self": Token.Type.SELF,
+    "static": Token.Type.STATIC,
     "switch": Token.Type.SWITCH,
     "throw": Token.Type.THROW,
     "true": Token.Type.TRUE,
