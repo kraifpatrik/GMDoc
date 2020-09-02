@@ -37,7 +37,6 @@ class Scope(Entity):
     def __repr__(self):
         def _print(entity, indent):
             s = (" " * indent * 4) + "* " + \
-                ("[" + entity.docs.str + "] " if entity.docs else "") + \
                 (entity.name if entity.name else "<anonymous>") + \
                 " ({})\n".format(type(entity).__name__)
             if isinstance(entity, Scope):
@@ -70,8 +69,42 @@ class Documentation(object):
     @staticmethod
     def from_string(_str):
         docs = Documentation()
-        # TODO: Parse docs
-        docs.str = _str.replace("///", "").replace("\n", " ")
+
+        _str = _str.replace("///", "")
+
+        while True:
+            m = re.match(r"\s*@([a-z]+)", _str)
+            if not m:
+                break
+
+            tag = m.group(1)
+            print("Tag", tag)
+            _str = _str[m.end(0):]
+
+            m = re.match(r"\s*\{([^\}]*)\}", _str)
+            if m:
+                typestr = m.group(1)
+                print("Type", typestr)
+                _str = _str[m.end(0):]
+            else:
+                typestr = None
+
+            name = None
+            if tag == "param":
+                m = re.match(r"\s*\[?([a-z_]+[a-z0-9_]*)\]?", _str, flags=re.IGNORECASE)
+                if m:
+                    name = m.group(1)
+                    print("Name", name)
+                    _str = _str[m.end(0):]
+
+            s = re.search(r"@[a-z]+", _str)
+            end = s.start(0) if s else len(_str)
+            desc = _str[:end].strip()
+
+            print("Desc", desc)
+
+            _str = _str[end:]
+
         return docs
 
 
