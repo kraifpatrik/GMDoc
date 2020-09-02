@@ -200,7 +200,7 @@ class Tokenizer(object):
                          get_token(r"^\$[a-f0-9]+", Token.Type.NUMBER) or
                          get_token(r"^@\"(\\\"|[^\"])*\"", Token.Type.STRING) or
                          get_token(r"^\"(\\\"|[^\"\n])*\"", Token.Type.STRING) or
-                         get_token(r"^\n", Token.Type.NEWLINE) or
+                         get_token(r"^\r?\n", Token.Type.NEWLINE) or
                          get_token(r"^\s+", Token.Type.WHITESPACE))
 
             if not token:
@@ -214,8 +214,8 @@ class Tokenizer(object):
                 _code = _code[token.len:]
                 at += token.len
             else:
-                print(_code)
                 raise TokenizationError()
+
         tokens.append(Token("", Token.Type.EOF, at, 0))
 
         return tokens
