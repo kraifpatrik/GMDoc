@@ -17,7 +17,8 @@ class Scope(object):
     def __repr__(self):
         def _print(scope, indent):
             s = (" " * indent * 4) + "* " + \
-                (scope.name if scope.name else "<anonymous>") + "\n"
+                (scope.name if scope.name else "<anonymous>") + \
+                " ({})\n".format(type(scope).__name__)
             for c in scope.children:
                 s += _print(c, indent + 1)
             return s
@@ -33,6 +34,10 @@ class Function(Scope):
 
 
 class Constructor(Scope):
+    pass
+
+
+class Enum(Scope):
     pass
 
 
@@ -94,15 +99,25 @@ class Parser(object):
         script = Script()
         current = script
 
+        # TODO: Error handling!
+
         while self.available():
             token = self.next()
 
+            # Enums
+            if token.type == Token.Type.ENUM:
+                name = self.consume(_type=Token.Type.NAME)
+                if self.consume(_type=Token.Type.BRACKET_CURLY_LEFT):
+                    enum = Enum(_name=name.value)
+                    current.add_child(enum)
+                    current = enum
+
             # Anonymous functions assigned to variables
-            if token.type == Token.Type.NAME:
+            elif token.type == Token.Type.NAME:
                 mark = self.mark()
 
                 if (self.consume(_type=Token.Type.EQUALS) and
-                    self.consume(_type=Token.Type.FUNCTION)):
+                        self.consume(_type=Token.Type.FUNCTION)):
                     if self.find(_type=Token.Type.BRACKET_CURLY_LEFT):
                         function = Function(_name=token.value)
                         current.add_child(function)
