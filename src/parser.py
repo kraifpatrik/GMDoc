@@ -95,6 +95,29 @@ class Parser(object):
         self.reset(mark)
         return None
 
+    def _parse_function(self):
+        # TODO: Mark and reset on errors
+
+        if not self.consume(_type=Token.Type.FUNCTION):
+            return None
+
+        name = self.consume(_type=Token.Type.NAME)
+        self.consume(_type=Token.Type.BRACKET_LEFT)
+
+        while self.consume(_type=Token.Type.NAME):
+            self.consume(_type=Token.Type.COMMA)
+
+        self.consume(_type=Token.Type.BRACKET_RIGHT)
+
+        constructor = self.consume(_type=Token.Type.CONSTRUCTOR)
+
+        self.consume(_type=Token.Type.BRACKET_CURLY_LEFT)
+
+        if constructor:
+            return Constructor(_name=name.value if name else None)
+
+        return Function(_name=name.value if name else None)
+
     def parse(self, prefix=""):
         script = Script()
         current = script
@@ -102,10 +125,11 @@ class Parser(object):
         # TODO: Error handling!
 
         while self.available():
-            token = self.next()
+            token = self.peek()
 
             # Enums
             if token.type == Token.Type.ENUM:
+                self.next()
                 name = self.consume(_type=Token.Type.NAME)
                 if self.consume(_type=Token.Type.BRACKET_CURLY_LEFT):
                     enum = Enum(_name=name.value)
@@ -114,34 +138,33 @@ class Parser(object):
 
             # Anonymous functions assigned to variables
             elif token.type == Token.Type.NAME:
-                mark = self.mark()
-
-                if (self.consume(_type=Token.Type.EQUALS) and
-                        self.consume(_type=Token.Type.FUNCTION)):
-                    if self.find(_type=Token.Type.BRACKET_CURLY_LEFT):
-                        function = Function(_name=token.value)
+                self.next()
+                if self.consume(_type=Token.Type.EQUALS):
+                    function = self._parse_function()
+                    if function:
                         current.add_child(function)
                         current = function
-                else:
-                    self.reset(mark)
 
             # Named functions
             elif token.type == Token.Type.FUNCTION:
-                name = self.consume(_type=Token.Type.NAME)
-                if name:
-                    if self.find(_type=Token.Type.BRACKET_CURLY_LEFT):
-                        function = Function(_name=name.value)
-                        current.add_child(function)
-                        current = function
+                function = self._parse_function()
+                if function:
+                    current.add_child(function)
+                    current = function
 
             # Other scopes
             elif token.type == Token.Type.BRACKET_CURLY_LEFT:
+                self.next()
                 scope = Scope()
                 current.add_child(scope)
                 current = scope
 
             # Scope end
             elif token.type == Token.Type.BRACKET_CURLY_RIGHT:
+                self.next()
                 current = current.parent
+
+            else:
+                self.next()
 
         return script
