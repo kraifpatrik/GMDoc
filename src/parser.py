@@ -109,6 +109,7 @@ class Documentation(object):
             split = desc.split("```")
             for i in range(len(split)):
                 if i % 2:
+                    # TODO: Delete spaces based on indent of opening ```
                     split[i] = re.sub(r"\n ", "\n", split[i])
                 else:
                     split[i] = "\n" + re.sub(r"\s+", " ", split[i]).strip() + "\n"
