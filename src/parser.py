@@ -97,7 +97,21 @@ class Parser(object):
         while self.available():
             token = self.next()
 
-            if token.type == Token.Type.FUNCTION:
+            # Anonymous functions assigned to variables
+            if token.type == Token.Type.NAME:
+                mark = self.mark()
+
+                if (self.consume(_type=Token.Type.EQUALS) and
+                    self.consume(_type=Token.Type.FUNCTION)):
+                    if self.find(_type=Token.Type.BRACKET_CURLY_LEFT):
+                        function = Function(_name=token.value)
+                        current.add_child(function)
+                        current = function
+                else:
+                    self.reset(mark)
+
+            # Named functions
+            elif token.type == Token.Type.FUNCTION:
                 name = self.consume(_type=Token.Type.NAME)
                 if name:
                     if self.find(_type=Token.Type.BRACKET_CURLY_LEFT):
@@ -105,11 +119,13 @@ class Parser(object):
                         current.add_child(function)
                         current = function
 
+            # Other scopes
             elif token.type == Token.Type.BRACKET_CURLY_LEFT:
                 scope = Scope()
                 current.add_child(scope)
                 current = scope
 
+            # Scope end
             elif token.type == Token.Type.BRACKET_CURLY_RIGHT:
                 current = current.parent
 
