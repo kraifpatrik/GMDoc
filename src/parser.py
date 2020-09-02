@@ -142,6 +142,8 @@ class Parser(object):
                 if self.consume(_type=Token.Type.EQUALS):
                     function = self._parse_function()
                     if function:
+                        if not function.name:
+                            function.name = token.value
                         current.add_child(function)
                         current = function
 
