@@ -97,6 +97,9 @@ class Token(object):
             self.at,
             self.len)
 
+    def is_whitespace(self):
+        return self.type in [Token.Type.WHITESPACE, Token.Type.NEWLINE]
+
 
 RESERVED = {
     "all": Token.Type.ALL,
