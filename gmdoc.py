@@ -7,12 +7,14 @@ from src.tokenizer import Tokenizer
 from pprint import pprint
 
 if __name__ == "__main__":
-    with open(sys.argv[1], "r") as f:
+    fname = sys.argv[1]
+    with open(fname, "r") as f:
         tokenizer = Tokenizer()
         tokens = tokenizer.tokenize(f.read())
         pprint(tokens)
         parser = Parser(tokens)
         parsed = parser.parse()
+        parsed.name = fname
         pprint(parsed)
     exit()
 
