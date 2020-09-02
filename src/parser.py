@@ -89,11 +89,13 @@ class Parser(object):
         self.index += 1
         return token
 
-    def consume(self, _value=None, _type=None, _ignore_whitespace=True):
+    def consume(self, _value=None, _type=None, _ignore_whitespace=True, _ignore_comments=True):
         mark = self.mark()
         while self.available():
             token = self.next()
             if _ignore_whitespace and token.is_whitespace():
+                continue
+            if _ignore_comments and token.is_comment():
                 continue
             if _value != None and token.value != _value:
                 self.reset(mark)
