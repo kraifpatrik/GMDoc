@@ -8,6 +8,9 @@ from jinja2 import Template
 from .parser import *
 
 
+markdown = mistune.Markdown(escape=False)
+
+
 def trim_code(code):
     return re.sub(r"\s+</code>", "</code>", code)
 
@@ -18,8 +21,6 @@ def add_bootstrap(code, table_class=""):
             table_class=table_class), code)
     code = re.sub(r"</table>", '</table></div>', code)
     code = code.replace('<pre>', '<pre class="rounded">')
-    code = code.replace('[DEPRECATED]</h1>', '<span class="badge badge-warning">DEPRECATED</span></h1>')
-    code = code.replace('[OBSOLETE]</h1>', '<span class="badge badge-danger">OBSOLETE</span></h1>')
     return code
 
 
@@ -131,7 +132,7 @@ def make_pages(meta, flattened, docs_src_dir="", docs_dir="", template="", dates
             with open(fpath) as f:
                 if fext == ".md":
                     content += add_bootstrap(
-                        trim_code(mistune.markdown(f.read())),
+                        trim_code(markdown(f.read())),
                         table_class="table-arguments" if path[0] == "ScriptingAPI" else "")
                 else:
                     content += f.read()
@@ -180,13 +181,17 @@ def resource_to_markdown(r):
 
     _deprecated = docs.get_tag("deprecated")
     _obsolete = docs.get_tag("obsolete")
+    _readonly = docs.get_tag("readonly")
 
     # Name and type
     content.append(
         "# {}".format(r.name) + \
-        (" [DEPRECATED]" if _deprecated else "") + \
-        (" [OBSOLETE]" if _obsolete else ""))
-    content.append("`{}`".format(type(r).__name__.lower()))
+        (' <span class="badge badge-warning">DEPRECATED</span>' if _deprecated else "") + \
+        (' <span class="badge badge-danger">OBSOLETE</span>' if _obsolete else ""))
+
+    content.append(
+        '<span class="badge badge-secondary">{}</span>'.format(type(r).__name__.lower()) + \
+        (' <span class="badge badge-info">read-only</span>' if _readonly else ""))
 
     # Function signature
     if isinstance(r, Function):
