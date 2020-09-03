@@ -1,23 +1,5 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
-import sys
-from src.parser import Parser
-from src.tokenizer import Tokenizer
-from pprint import pprint
-
-if __name__ == "__main__":
-    fname = sys.argv[1]
-    with open(fname, "r") as f:
-        tokenizer = Tokenizer()
-        tokens = tokenizer.tokenize(f.read())
-        pprint(tokens)
-        parser = Parser(tokens)
-        parsed = parser.parse()
-        parsed.name = fname
-        pprint(parsed)
-    exit()
-
 import os
 import sys
 

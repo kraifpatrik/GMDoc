@@ -5,6 +5,8 @@ import re
 import mistune
 from jinja2 import Template
 
+from .parser import *
+
 
 def trim_code(code):
     return re.sub(r"\s+</code>", "</code>", code)
@@ -62,35 +64,51 @@ def function_to_markdown(fn):
     )
 
     content = []
-    content.append(template.format(**fn))
+    content.append(template.format(**{
+        "name": fn.name,
+        "signature": fn.docs.get_tag("func").desc
+    }))
 
-    if fn.get("desc"):
-        content.append(template_desc.format(**fn))
+    _desc = fn.docs.get_tag("desc")
+    if _desc:
+        content.append(template_desc.format(**{
+            "desc": _desc.desc
+        }))
 
-    params = fn.get("params", [])
-    if params:
-        for p in params:
-            p["desc"] = re.sub(r"\n+", " ", p["desc"])
+    _params = fn.docs.get_tag("param", single=False)
+    if _params:
         content.append(
-            template_header + "\n".join([template_row.format(**p) for p in params]))
+            template_header + "\n".join([template_row.format(**{ "name": p.name, "type": p.type, "desc": p.desc }) for p in _params]))
 
-    retval = fn.get("return", {})
-    if retval:
-        content.append(template_return.format(**retval))
+    _retval = fn.docs.get_tag("return")
+    if _retval:
+        content.append(template_return.format(**{
+            "type": _retval.type,
+            "desc": _retval.desc,
+        }))
 
-    if fn.get("example"):
-        content.append(template_example.format(**fn))
+    _example = fn.docs.get_tag("example")
+    if _example:
+        content.append(template_example.format(**{
+            "example": _example.desc
+        }))
 
-    if fn.get("note"):
-        content.append(template_note.format(**fn))
+    _note = fn.docs.get_tag("note")
+    if _note:
+        content.append(template_note.format(**{
+            "note": _note.desc
+        }))
 
-    if fn.get("source"):
-        content.append(template_source.format(**fn))
+    _source = fn.docs.get_tag("source")
+    if _source:
+        content.append(template_source.format(**{
+            "source": _source.desc
+        }))
 
-    see = fn.get("see")
-    if see:
+    _see = fn.docs.get_tag("see", single=False)
+    if _see:
         cnt = "### See\n"
-        cnt += ", ".join(["[{s}]({s}.html)".format(s=s) for s in see])
+        cnt += ", ".join(["[{s}]({s}.html)".format(s=s.desc) for s in _see])
         content.append(cnt)
 
     return "\n\n".join(content)
@@ -113,16 +131,14 @@ def enum_to_markdown(en):
     template_row = "| `{name}` | {desc} |"
 
     content = []
-    content.append(template.format(**en))
+    content.append(template.format(**{
+        "name": en.name,
+        "desc": en.docs.get_tag("enum").desc
+    }))
 
-    members = en.get("members", [])
-
-    if members:
-        for p in members:
-            p["desc"] = re.sub(r"\n+", " ", p["desc"])
-
+    if en.children:
         content.append(
-            template_header + "\n".join([template_row.format(**p) for p in members]))
+            template_header + "\n".join([template_row.format(**{ "name": c.name, "desc": c.docs.get_tag("member").desc }) for c in en.children]))
 
     return "\n\n".join(content)
 
@@ -135,7 +151,11 @@ def macro_to_markdown(macro):
         "`{type}` {desc}"
     )
 
-    return template.format(**macro)
+    return template.format(**{
+        "name": macro.name,
+        "type": macro.docs.get_tag("macro").type,
+        "desc": macro.docs.get_tag("macro").desc,
+    })
 
 
 def make_menu(toc, path):
@@ -266,13 +286,25 @@ def make_pages(meta, flattened, docs_src_dir="", docs_dir="", template="", dates
 
 
 def resource_to_markdown(r):
-    _type = r["_type"]
-
-    if _type == "macro":
-        return macro_to_markdown(r)
-    elif _type == "enum":
-        return enum_to_markdown(r)
-    elif _type == "function":
-        return function_to_markdown(r)
-    else:
+    if not r.docs:
         return None
+
+    if r.docs.get_tag("private"):
+        return None
+
+    if isinstance(r, Macro):
+        return macro_to_markdown(r)
+
+    if isinstance(r, Enum):
+        return enum_to_markdown(r)
+
+    if isinstance(r, Variable):
+        return None
+
+    if isinstance(r, Constructor):
+        return None
+
+    if isinstance(r, Function):
+        return function_to_markdown(r)
+
+    return None

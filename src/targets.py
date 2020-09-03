@@ -6,7 +6,7 @@ import sys
 from .meta import Meta
 from .parser import Parser
 from .printer import *
-from .tokenizer import Token, tokenize
+from .tokenizer import *
 from .utils import *
 
 
@@ -75,7 +75,7 @@ class BuildTarget(Target):
         return flattened
 
     def parse_resources(self, prefix):
-        parsed = {}
+        parsed = []
 
         for root, _, files in os.walk(self.project_dir):
             for file in files:
@@ -85,19 +85,23 @@ class BuildTarget(Target):
                     continue
                 fpath = os.path.join(root, file)
                 print("Parsing", fpath)
-                tokens = []
+
                 with open(fpath) as f:
-                    tokens += tokenize(f)
-                parsed = merge(Parser(tokens).parse(prefix), parsed)
+                    tokenizer = Tokenizer()
+                    tokens = tokenizer.tokenize(f.read())
+                    parser = Parser(tokens)
+                    scope = parser.parse()
+                    scope.name = file
+                    parsed.append(scope)
 
         return parsed
 
     def flatten_resources(self, parsed):
         resources = []
-        for _, v in parsed.items():
-            for r in v:
-                resources.append(r)
-        resources.sort(key=lambda r: r["name"])
+        for p in parsed:
+            for c in p.children:
+                resources.append(c)
+        resources.sort(key=lambda r: r.name)
         return resources
 
     def execute(self, *args, **kwargs):
@@ -143,11 +147,11 @@ class BuildTarget(Target):
         }
 
         for r in resources:
-            name = r["name"]
+            name = r.name
 
             md = resource_to_markdown(r)
             if md is None:
-                print("Skipping {name} of type {_type}".format(**r))
+                print("Skipping {} of type {}".format(r.name, type(r).__name__))
                 continue
 
             print("Generating Markdown for", name)

@@ -148,11 +148,10 @@ class Documentation(object):
                         re.sub(r"\s+", " ", split[i]).strip() + "\n"
             desc = "```".join(split).strip()
 
-            docs.add_tag(Tag(tag, name, typestr, desc))
+            docs.add_tag(Tag(tag, typestr, name, desc))
 
             _str = _str[end:]
 
-        print(docs)
         return docs
 
 
