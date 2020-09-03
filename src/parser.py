@@ -20,9 +20,7 @@ class Member(Entity):
 
 
 class Variable(Entity):
-    def __init__(self, **kwargs):
-        super(Variable, self).__init__(**kwargs)
-        self.is_global = False
+    pass
 
 
 class Scope(Entity):
@@ -275,9 +273,9 @@ class Parser(object):
                 self.next()
                 self.consume(_type=Token.Type.DOT)
                 name = self.consume(_type=Token.Type.NAME)
-                variable = Variable(_name=name.value, _docs=documentation)
+                variable = Variable(
+                    _name="global." + name.value, _docs=documentation)
                 documentation = None
-                variable.is_global = True
                 current.add_child(variable)
 
             # Variables and names

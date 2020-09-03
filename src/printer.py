@@ -21,143 +21,6 @@ def add_bootstrap(code, table_class=""):
     return code
 
 
-def function_to_markdown(fn):
-    template = (
-        "# {name}\n"
-        "`function`\n"
-        "```gml\n"
-        "{signature}\n"
-        "```"
-    )
-
-    template_desc = (
-        "## Description\n"
-        "{desc}"
-    )
-
-    template_header = (
-        "### Arguments\n"
-        "| Name | Type | Description |\n"
-        "| ---- | ---- | ----------- |\n"
-    )
-
-    template_row = "| {name} | `{type}` | {desc} |"
-
-    template_return = (
-        "## Returns\n"
-        "`{type}` {desc}"
-    )
-
-    template_example = (
-        "## Example\n"
-        "{example}"
-    )
-
-    template_note = (
-        "## Note\n"
-        "{note}"
-    )
-
-    template_source = (
-        "## Source\n"
-        "{source}"
-    )
-
-    content = []
-    content.append(template.format(**{
-        "name": fn.name,
-        "signature": fn.docs.get_tag("func").desc
-    }))
-
-    _desc = fn.docs.get_tag("desc")
-    if _desc:
-        content.append(template_desc.format(**{
-            "desc": _desc.desc
-        }))
-
-    _params = fn.docs.get_tag("param", single=False)
-    if _params:
-        content.append(
-            template_header + "\n".join([template_row.format(**{ "name": p.name, "type": p.type, "desc": p.desc }) for p in _params]))
-
-    _retval = fn.docs.get_tag("return")
-    if _retval:
-        content.append(template_return.format(**{
-            "type": _retval.type,
-            "desc": _retval.desc,
-        }))
-
-    _example = fn.docs.get_tag("example")
-    if _example:
-        content.append(template_example.format(**{
-            "example": _example.desc
-        }))
-
-    _note = fn.docs.get_tag("note")
-    if _note:
-        content.append(template_note.format(**{
-            "note": _note.desc
-        }))
-
-    _source = fn.docs.get_tag("source")
-    if _source:
-        content.append(template_source.format(**{
-            "source": _source.desc
-        }))
-
-    _see = fn.docs.get_tag("see", single=False)
-    if _see:
-        cnt = "### See\n"
-        cnt += ", ".join(["[{s}]({s}.html)".format(s=s.desc) for s in _see])
-        content.append(cnt)
-
-    return "\n\n".join(content)
-
-
-def enum_to_markdown(en):
-    template = (
-        "# {name}\n"
-        "`enum`\n"
-        "## Description\n"
-        "{desc}"
-    )
-
-    template_header = (
-        "### Members\n"
-        "| Name | Description |\n"
-        "| ---- | ----------- |\n"
-    )
-
-    template_row = "| `{name}` | {desc} |"
-
-    content = []
-    content.append(template.format(**{
-        "name": en.name,
-        "desc": en.docs.get_tag("enum").desc
-    }))
-
-    if en.children:
-        content.append(
-            template_header + "\n".join([template_row.format(**{ "name": c.name, "desc": c.docs.get_tag("member").desc }) for c in en.children]))
-
-    return "\n\n".join(content)
-
-
-def macro_to_markdown(macro):
-    template = (
-        "# {name}\n"
-        "`macro`\n"
-        "## Description\n"
-        "`{type}` {desc}"
-    )
-
-    return template.format(**{
-        "name": macro.name,
-        "type": macro.docs.get_tag("macro").type,
-        "desc": macro.docs.get_tag("macro").desc,
-    })
-
-
 def make_menu(toc, path):
     counter = 0
 
@@ -286,25 +149,94 @@ def make_pages(meta, flattened, docs_src_dir="", docs_dir="", template="", dates
 
 
 def resource_to_markdown(r):
-    if not r.docs:
+    docs = r.docs
+
+    if not docs:
         return None
 
-    if r.docs.get_tag("private"):
+    if docs.get_tag("private"):
         return None
 
-    if isinstance(r, Macro):
-        return macro_to_markdown(r)
+    content = []
 
-    if isinstance(r, Enum):
-        return enum_to_markdown(r)
+    def _add_basic(tag, title):
+        _tag = tag if isinstance(tag, Tag) else docs.get_tag(tag)
+        if _tag:
+            content.append(
+                "## {}\n".format(title) +
+                ("`{}` ".format(_tag.type) if _tag.type else "") +
+                _tag.desc)
 
-    if isinstance(r, Variable):
-        return None
+    # Name and type
+    content.append("# {}".format(r.name))
+    content.append("`{}`".format(type(r).__name__.lower()))
 
-    if isinstance(r, Constructor):
-        return None
-
+    # Function signature
     if isinstance(r, Function):
-        return function_to_markdown(r)
+        _func = docs.get_tag("func")
+        if _func:
+            content.append("```gml\n{}\n```".format(_func.desc))
 
-    return None
+    # Description
+    _desc = docs.get_tag("desc")
+
+    if not _desc:
+        if isinstance(r, Macro):
+            _desc = docs.get_tag("macro")
+        elif isinstance(r, Enum):
+            _desc = docs.get_tag("enum")
+        elif isinstance(r, Variable):
+            _desc = docs.get_tag("var")
+
+    _add_basic(_desc, "Description")
+
+    # Enum members
+    if isinstance(r, Enum):
+        if r.children:
+            members_header = (
+                "## Members\n"
+                "| Name | Description |\n"
+                "| ---- | ----------- |\n"
+            )
+
+            members_row = "| `{name}` | {desc} |"
+
+            content.append(
+                members_header + "\n".join([members_row.format(**{"name": c.name, "desc": c.docs.get_tag("member").desc}) for c in r.children]))
+
+    # Function arguments
+    if isinstance(r, Function):
+        _params = docs.get_tag("param", single=False)
+        if _params:
+            arguments_header = (
+                "## Arguments\n"
+                "| Name | Type | Description |\n"
+                "| ---- | ---- | ----------- |\n"
+            )
+
+            arguments_row = "| {name} | `{type}` | {desc} |"
+
+            content.append(
+                arguments_header + "\n".join([arguments_row.format(**{"name": p.name, "type": p.type, "desc": p.desc}) for p in _params]))
+
+    # Function return value
+    if isinstance(r, Function):
+        _add_basic("return", "Returns")
+
+    # Example
+    _add_basic("example", "Example")
+
+    # Note
+    _add_basic("note", "Note")
+
+    # References
+    _see = docs.get_tag("see", single=False)
+    if _see:
+        cnt = "## See\n"
+        cnt += ", ".join(["[{s}]({s}.html)".format(s=s.desc) for s in _see])
+        content.append(cnt)
+
+    # Source
+    _add_basic("source", "Source")
+
+    return "\n\n".join(content)
