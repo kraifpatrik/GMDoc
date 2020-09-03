@@ -18,6 +18,7 @@ def add_bootstrap(code, table_class=""):
             table_class=table_class), code)
     code = re.sub(r"</table>", '</table></div>', code)
     code = code.replace('<pre>', '<pre class="rounded">')
+    code = code.replace('[OBSOLETE]</h1>', '<span class="badge badge-danger">OBSOLETE</span></h1>')
     return code
 
 
@@ -167,8 +168,12 @@ def resource_to_markdown(r):
                 ("`{}` ".format(_tag.type) if _tag.type else "") +
                 _tag.desc)
 
+    _obsolete = docs.get_tag("obsolete")
+
     # Name and type
-    content.append("# {}".format(r.name))
+    content.append(
+        "# {}".format(r.name) + \
+        (" [OBSOLETE]" if _obsolete else ""))
     content.append("`{}`".format(type(r).__name__.lower()))
 
     # Function signature
@@ -238,5 +243,8 @@ def resource_to_markdown(r):
 
     # Source
     _add_basic("source", "Source")
+
+    # Obsolete
+    _add_basic(_obsolete, "Obsolete")
 
     return "\n\n".join(content)
