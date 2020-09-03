@@ -104,6 +104,9 @@ class Documentation(object):
 
         _str = _str.replace("///", "")
 
+        # Handle links
+        _str = re.sub(r"\{@link ([^\}]+)\}", "[\\1](\\1.html)", _str)
+
         while True:
             # Tag
             m = re.match(r"\s*@([a-z]+)", _str)
