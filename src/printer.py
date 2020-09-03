@@ -192,7 +192,9 @@ def resource_to_markdown(r):
     if isinstance(r, Function):
         _func = docs.get_tag("func")
         if _func:
-            content.append("```gml\n{}\n```".format(_func.desc))
+            content.append("```gml\n{}{}\n```".format(
+                "new " if isinstance(r, Constructor) else "",
+                _func.desc))
 
     # Description
     _desc = docs.get_tag("desc")
