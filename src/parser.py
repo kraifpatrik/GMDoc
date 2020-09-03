@@ -38,7 +38,8 @@ class Scope(Entity):
         def _print(entity, indent):
             s = (" " * indent * 4) + "* " + \
                 (entity.name if entity.name else "<anonymous>") + \
-                " ({})\n".format(type(entity).__name__)
+                " ({}) ".format(type(entity).__name__) + \
+                (repr(entity.docs) if entity.docs else "") + "\n"
             if isinstance(entity, Scope):
                 for c in entity.children:
                     s += _print(c, indent + 1)
@@ -62,9 +63,42 @@ class Enum(Scope):
     pass
 
 
+class Tag(object):
+    def __init__(self, _tag, _type=None, _name=None, _desc=""):
+        self.tag = _tag
+        self.type = _type
+        self.name = _name
+        self.desc = _desc
+
+    def __repr__(self):
+        return str({
+            "tag": self.tag,
+            "type": self.type,
+            "name": self.name,
+            "desc": self.desc,
+        })
+
+
 class Documentation(object):
     def __init__(self):
-        pass
+        self.tags = {}
+
+    def __repr__(self):
+        return str(self.tags)
+
+    def add_tag(self, tag):
+        tagname = tag.tag
+        if not tagname in self.tags:
+            self.tags[tagname] = []
+        self.tags[tagname].append(tag)
+
+    def get_tag(self, tag, single=True):
+        tags = self.tags.get(tag, [])
+        if single:
+            if len(tags) == 0:
+                return None
+            return tags[0]
+        return tags
 
     @staticmethod
     def from_string(_str):
@@ -79,14 +113,12 @@ class Documentation(object):
                 break
 
             tag = m.group(1)
-            print("Tag", tag)
             _str = _str[m.end(0):]
 
             # Optional type
             m = re.match(r"\s*\{([^\}]*)\}", _str)
             if m:
                 typestr = m.group(1)
-                print("Type", typestr)
                 _str = _str[m.end(0):]
             else:
                 typestr = None
@@ -94,10 +126,10 @@ class Documentation(object):
             # Param name
             name = None
             if tag == "param":
-                m = re.match(r"\s*\[?([a-z_]+[a-z0-9_]*)\]?", _str, flags=re.IGNORECASE)
+                m = re.match(r"\s*\[?([a-z_]+[a-z0-9_]*)\]?",
+                             _str, flags=re.IGNORECASE)
                 if m:
                     name = m.group(1)
-                    print("Name", name)
                     _str = _str[m.end(0):]
 
             # Description
@@ -112,12 +144,15 @@ class Documentation(object):
                     # TODO: Delete spaces based on indent of opening ```
                     split[i] = re.sub(r"\n ", "\n", split[i])
                 else:
-                    split[i] = "\n" + re.sub(r"\s+", " ", split[i]).strip() + "\n"
+                    split[i] = "\n" + \
+                        re.sub(r"\s+", " ", split[i]).strip() + "\n"
             desc = "```".join(split).strip()
-            print(desc)
+
+            docs.add_tag(Tag(tag, name, typestr, desc))
 
             _str = _str[end:]
 
+        print(docs)
         return docs
 
 
@@ -266,7 +301,8 @@ class Parser(object):
 
                     # Other
                     if isinstance(current, Constructor):
-                        variable = Variable(_name=token.value, _docs=documentation)
+                        variable = Variable(
+                            _name=token.value, _docs=documentation)
                         documentation = None
                         current.add_child(variable)
                         continue
