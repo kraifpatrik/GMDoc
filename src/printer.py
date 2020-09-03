@@ -18,6 +18,7 @@ def add_bootstrap(code, table_class=""):
             table_class=table_class), code)
     code = re.sub(r"</table>", '</table></div>', code)
     code = code.replace('<pre>', '<pre class="rounded">')
+    code = code.replace('[DEPRECATED]</h1>', '<span class="badge badge-warning">DEPRECATED</span></h1>')
     code = code.replace('[OBSOLETE]</h1>', '<span class="badge badge-danger">OBSOLETE</span></h1>')
     return code
 
@@ -28,11 +29,14 @@ def make_menu(toc, path):
     def make_menu_item(k, v):
         nonlocal counter
         counter += 1
-        isfolder = isinstance(v, dict)
-        fpath = v["file"] if isfolder else v
+        isdict = isinstance(v, dict)
+        isfolder = isdict and "pages" in v
+        fpath = v["file"] if isdict else v
         fname, _ = os.path.splitext(os.path.basename(fpath))
         isinpath = fname in path
         iscurrent = fname == path[-1]
+        isdeprecated = isdict and v.get("deprecated", False)
+        isobsolete = isdict and v.get("obsolete", False)
 
         res = "<li>"
 
@@ -48,6 +52,12 @@ def make_menu(toc, path):
             file=fname,
             link=k,
             classes=" font-weight-bold active" if iscurrent else "")
+
+        if isdeprecated:
+            res += ' <span class="badge badge-warning">DEPRECATED</span>'
+        
+        if isobsolete:
+            res += ' <span class="badge badge-danger">OBSOLETE</span>'
 
         if isfolder:
             res += """\n<ul id="folder-{}"{}>\n""".format(
@@ -168,11 +178,13 @@ def resource_to_markdown(r):
                 ("`{}` ".format(_tag.type) if _tag.type else "") +
                 _tag.desc)
 
+    _deprecated = docs.get_tag("deprecated")
     _obsolete = docs.get_tag("obsolete")
 
     # Name and type
     content.append(
         "# {}".format(r.name) + \
+        (" [DEPRECATED]" if _deprecated else "") + \
         (" [OBSOLETE]" if _obsolete else ""))
     content.append("`{}`".format(type(r).__name__.lower()))
 
@@ -273,6 +285,9 @@ def resource_to_markdown(r):
 
     # Source
     _add_basic("source", "Source")
+
+    # Deprecated
+    _add_basic(_deprecated, "Deprecated")
 
     # Obsolete
     _add_basic(_obsolete, "Obsolete")
