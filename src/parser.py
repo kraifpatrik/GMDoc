@@ -32,6 +32,18 @@ class Scope(Entity):
         child.parent = self
         self.children.append(child)
 
+    def get_children(self, _type=None, _name=None, _docs=False):
+        children = []
+        for c in self.children:
+            if _type != None and not isinstance(c, _type):
+                continue
+            if _name != None and not c.name != _name:
+                continue
+            if _docs and (not c.docs or c.docs.get_tag("private")):
+                continue
+            children.append(c)
+        return children
+
     def __repr__(self):
         def _print(entity, indent):
             s = (" " * indent * 4) + "* " + \

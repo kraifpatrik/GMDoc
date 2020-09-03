@@ -228,6 +228,36 @@ def resource_to_markdown(r):
     if isinstance(r, Function):
         _add_basic("return", "Returns")
 
+    # Constructor specific
+    if isinstance(r, Constructor):
+        # Properties
+        _props = r.get_children(_type=Variable, _docs=True)
+        if _props:
+            properties_header = (
+                "## Properties\n"
+                "| Name | Description |\n"
+                "| ---- | ----------- |\n"
+            )
+
+            properties_row = "| [{name}](" +r.name + ".{name}.html) | {desc} |"
+
+            content.append(
+                properties_header + "\n".join([properties_row.format(**{"name": p.name, "desc": p.docs.get_tag("var").desc}) for p in _props]))
+
+        # Methods
+        _methods = r.get_children(_type=Function, _docs=True)
+        if _methods:
+            methods_header = (
+                "## Methods\n"
+                "| Name | Description |\n"
+                "| ---- | ----------- |\n"
+            )
+
+            methods_row = "| [{name}](" +r.name + ".{name}.html) | {desc} |"
+
+            content.append(
+                methods_header + "\n".join([methods_row.format(**{"name": m.name, "desc": m.docs.get_tag("desc").desc if m.docs.get_tag("desc") else ""}) for m in _methods]))
+
     # Example
     _add_basic("example", "Example")
 
