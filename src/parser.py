@@ -42,6 +42,7 @@ class Scope(Entity):
             if _docs and (not c.docs or c.docs.get_tag("private")):
                 continue
             children.append(c)
+        children.sort(key=lambda c: c.name)
         return children
 
     def __repr__(self):

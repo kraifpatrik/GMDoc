@@ -159,7 +159,25 @@ class BuildTarget(Target):
             with open(fname, "w") as f:
                 f.write(md)
 
-            scripting_api_toc["pages"][name] = fname
+            if isinstance(r, Constructor):
+                children = r.get_children(_docs=True)
+                children_toc = {}
+                for c in children:
+                    md = resource_to_markdown(c)
+                    if md is None:
+                        print("Skipping {}.{} of type {}".format(r.name, c.name, type(c).__name__))
+                        continue
+                    print("Generating Markdown for {}.{}".format(r.name, c.name))
+                    cfname = os.path.abspath("{}/{}.{}.md".format(out_dir, r.name, c.name))
+                    with open(cfname, "w") as f:
+                        f.write(md)
+                    children_toc[c.name] = cfname
+                scripting_api_toc["pages"][name] = {
+                    "file": fname,
+                    "pages": children_toc
+                }
+            else:
+                scripting_api_toc["pages"][name] = fname
 
         toc["Scripting API"] = scripting_api_toc
 
