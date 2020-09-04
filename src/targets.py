@@ -158,7 +158,7 @@ class BuildTarget(Target):
             fname = os.path.abspath("{}/{}.md".format(out_dir, name))
             with open(fname, "w") as f:
                 f.write(md)
-            
+
             scripting_api_toc["pages"][name] = {
                 "file": fname,
                 "deprecated": True if r.docs.get_tag("deprecated") else False,
