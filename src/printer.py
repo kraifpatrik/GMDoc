@@ -56,7 +56,7 @@ def make_menu(toc, path):
 
         if isdeprecated:
             res += ' <span class="badge badge-warning">DEPRECATED</span>'
-        
+
         if isobsolete:
             res += ' <span class="badge badge-danger">OBSOLETE</span>'
 
@@ -286,6 +286,7 @@ def resource_to_markdown(r):
     # References
     _see = docs.get_tag("see", single=False)
     if _see:
+        _see.sort(key=lambda s: s.desc)
         cnt = "## See\n"
         cnt += ", ".join(["[{s}]({s}.html)".format(s=s.desc) for s in _see])
         content.append(cnt)

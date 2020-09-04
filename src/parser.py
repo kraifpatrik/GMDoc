@@ -115,7 +115,8 @@ class Documentation(object):
     def from_string(_str):
         docs = Documentation()
 
-        _str = _str.replace("///", "")
+        _str = _str.split("\n")
+        _str = "\n".join(list(map(lambda l: re.sub(r"^\s*///", "", l, count=1), _str)))
 
         # Handle links
         _str = re.sub(r"\{@link ([^\}]+)\}", "[\\1](\\1.html)", _str)
@@ -147,7 +148,7 @@ class Documentation(object):
                     _str = _str[m.end(0):]
 
             # Description
-            s = re.search(r"@[a-z]+", _str)
+            s = re.search(r"(?<!/// )@[a-z]+", _str)
             end = s.start(0) if s else len(_str)
             desc = _str[:end].strip()
 
