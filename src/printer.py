@@ -17,7 +17,7 @@ def trim_code(code):
 
 def add_bootstrap(code, table_class=""):
     code = re.sub(
-        r"<table>", '<div class="table-responsive"><table class="table table-sm {table_class}">'.format(
+        r"<table>", '<div class="table-responsive"><table class="table table-sm table-striped border {table_class}">'.format(
             table_class=table_class), code)
     code = re.sub(r"</table>", '</table></div>', code)
     code = code.replace('<pre>', '<pre class="rounded">')

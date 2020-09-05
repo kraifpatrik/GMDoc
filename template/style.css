@@ -50,7 +50,7 @@ body, html {
 }
 
 .table-arguments td:last-child {
-  max-width: 75%;
+  max-width: 75% !important;
   width: 100%;
 }
 
