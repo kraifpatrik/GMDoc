@@ -1,5 +1,5 @@
 # GMDoc
-> Documentation generator for GameMaker Studio 2
+> Documentation generator for GameMaker Studio 2. Now supports GMS2.3+!
 
 ![License](https://img.shields.io/github/license/kraifpatrik/ce)
 
@@ -9,9 +9,9 @@ Donate: [PayPal.Me](https://www.paypal.me/kraifpatrik/5usd)
 * [Installation](#installation)
 * [Documenting projects](#documenting-projects)
   - [GMDoc initialization](#gmdoc-initialization)
-  - [Documenting enums](#documenting-enums)
-  - [Documenting macros](#documenting-macros)
-  - [Documenting scripts](#documenting-scripts)
+  - [Supported tags](#supported-tags)
+  - [Links](#links)
+  - [Examples](#examples)
   - [Custom documentation pages](#custom-documentation-pages)
 * [Building documentation](#building-documentation)
 * [Extras](#extras)
@@ -64,44 +64,131 @@ During the initialization you will be asked to input following values:
 
 After the initialization is done, a `gmdoc.json` file will be created in the project's folder, as well as a new directory `docs_src`, where you can add [custom documentation pages](#custom-documentation-pages).
 
-## Documenting enums
+## Supported tags
+The general format for tags is following:
 ```gml
-/// @enum Enum description goes here.
-enum EnumName
+/// @tag [{item_type}] [item_name] Tag description. It can span over multiple lines
+/// like this.
+```
+`item_type` and `item_name` are optional and may not be applicable to all documented items. `item_name` can be surrounded by square bracket, which is used to indicate optional parameters of functions.
+
+Tag | Description
+--- | -----------
+`@deprecated` | Marks an API as deprecated.
+`@desc` | Add a description to a documented item.
+`@enum` | Add a description to an enum.
+`@example` | Provide an example of how to use a documented item.
+`@extends` | Indicate that a struct inherits from another struct.
+`@func` | Document a function signature.
+`@macro` | Add a description to a macro.
+`@member` | Add a description to an enum member.
+`@note` | Add a note to an item's documentation.
+`@obsolete` | Mark a documented item as obsolete.
+`@param` | Describe a function parameter.
+`@private` | Disable printing out documentation for an item.
+`@readonly` | Mark a documented item as read-only.
+`@return` | Describe a return value of a function.
+`@see` | Add a reference to another documented item.
+`@source` | Provide credits or a link to the original implementation.
+`@throws` | Indicate that a function throws an exception.
+`@var` | Add a description to a variable.
+
+## Links
+You can add links to another documented items into tag descriptions using
+`{@link <item-name>}`.
+
+## Examples
+```gml
+/// @macro {string} A hello string.
+#macro HELLO_STRING "Hello, GMDoc!"
+
+/// @var {bool} A read-only variable which won't show up in the generated
+/// documentation.
+/// @private
+/// @readonly
+global.__gmdoc_is_awesome = true;
+
+/// @enum An enumeration of item qualities.
+enum Quality
 {
-    /// @member Enum member description.
-    Some,
-    /// @member Another member description.
-    Member,
-    // This one does not have a description, so it won't occur in the docs.
-    Here,
+    /// @member The item is a poop!
+    Poopy,
+    /// @member The item is *s i c c*!
+    Sicc
 };
-```
 
-## Documenting macros
-```gml
-/// @macro {type} Macro description goes here.
-#macro MACRO_NAME macro_value
-```
+/// @func Error([_msg])
+/// @desc Base class for all errors.
+/// @param {string} [_msg] The error message. Defaults to an empty string.
+function Error() constructor
+{
+    /// @var {string} The error message.
+    /// @readonly
+    msg = (argument_count > 0) ? argument[0] : "";
+}
 
-*The macro type can be omitted.*
+/// @func OopsieError()
+/// @desc An oopsie error. Thrown when something goes wrong.
+/// @extends Error
+function OopsieError() : Error("Oopsie!") constructor {}
 
-## Documenting scripts
-```gml
-/// @func script_name(arg1[, arg2])
-/// @desc Script description goes here.
-/// @param {type} arg1 Argument description.
-/// @param {type} [arg2] Optional argument description.
-/// @return {type} Return value description.
-/// @example You can write example code using Markdown like this:
+/// @func Example(_quality)
+/// @desc An example.
+/// @param {Quality} _quality The quality of the example.
+/// @see Quality
+function Example(_quality) constructor
+{
+    /// @var {Quality} The quality of the example.
+    /// @private
+    quality = _quality;
+
+    /// @func say_hello()
+    /// @desc Either prints {@link HELLO_STRING} to the console or throws
+    /// an error - based on the quality of the example!
+    /// @throws {OopsieError} If the quality of the example is poopy!
+    static say_hello = function () {
+        if (quality == Quality.Sicc)
+        {
+            show_debug_message(HELLO_STRING);
+        }
+        else
+        {
+            throw new OopsieError();
+        }
+    };
+};
+
+/// @func make_sicc_example()
+/// @desc Creates a *s i c c* example!
+/// @return {Example} The created example.
+/// @obsolete This function is obsolete! Please use {@link make_random_example}
+/// instead.
+function make_sicc_example()
+{
+    return new Example(Quality.Sicc);
+}
+
+/// @func make_random_example()
+/// @desc Creates {@link Example} of random {@link Quality}.
+/// @return {Example} The created example.
+/// @example
 /// ```gml
-/// // Example code goes here...
+/// var _example = make_random_example();
+/// try
+/// {
+///     _example.say_hello();
+/// }
+/// catch (e)
+/// {
+///     show_debug_message(e.msg);
+/// }
 /// ```
-/// @note A note to the scripts usage or implementation for example.
-/// @source https://url.to/the/original/implementation
-/// @see another_script
-/// @see AnEnum
-/// @see OR_A_MACRO
+/// @see Example.say_hello
+function make_random_example()
+{
+    var _quality = (random(100) == 13.37) ? Quality.Sicc : Quality.Poopy;
+    return new Example(_quality);
+}
 ```
 
 *All tags except `@func` are optional. Parameter and return value types can be omitted.*
@@ -109,11 +196,11 @@ enum EnumName
 You may want to improve readability of your script documentation comments by indenting descriptions with spaces and putting `///` lines between parts with dense text like so:
 
 ```gml
-/// @func script_name(arg, anotherArg)
-/// @desc Script description here.
+/// @func function_name(arg, another_arg)
+/// @desc Function description here.
 ///
-/// @param {type} arg        Argument description here.
-/// @param {type} anotherArg Another argument description here.
+/// @param {type} arg         Argument description here.
+/// @param {type} another_arg Another argument description here.
 ///
 /// @return {type} Return value description here.
 ```
