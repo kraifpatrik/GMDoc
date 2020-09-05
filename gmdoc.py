@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 import os
 import sys
+import traceback
 
 from src.targets import HelpTarget, InitTarget, BuildTarget
 
@@ -30,4 +31,7 @@ if __name__ == "__main__":
         # Ignore Ctrl+C
         print()
     except Exception as e:
-        print(str(e))
+        print()
+        print("ERROR:")
+        print()
+        print(traceback.format_exc())
