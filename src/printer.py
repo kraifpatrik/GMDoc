@@ -287,8 +287,8 @@ def resource_to_markdown(r):
     # Throws
     _throws = docs.get_tag("throws", single=False)
     if _throws:
+        _throws.sort(key=lambda v: v.type)
         throws_item = "  * [{type}]({type}.html) - {desc}"
-
         content.append(
             "## Throws\n" + \
             "\n".join([throws_item.format(type=t.type, desc=t.desc) for t in _throws]))
@@ -302,7 +302,7 @@ def resource_to_markdown(r):
     # References
     _see = docs.get_tag("see", single=False)
     if _see:
-        _see.sort(key=lambda s: s.desc)
+        _see.sort(key=lambda v: v.desc)
         cnt = "## See\n"
         cnt += ", ".join(["[{s}]({s}.html)".format(s=s.desc) for s in _see])
         content.append(cnt)
