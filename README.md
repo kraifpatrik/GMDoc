@@ -31,13 +31,14 @@ pip3 install -r requirements.txt
 *It is recommended to add `C:\path\to\gmdoc\bin` into your `PATH` to be able to run gmdoc from anywhere.*
 
 # Documenting projects
-Each documentation line must start with three forward slashes `///`.
+The general documentation format is:
 
-Tag descriptions can be split into multiple lines like so:
 ```gml
-/// @tag A very descriptive documentation
-/// that needs to be split into multiple lines.
+/// @tag [{item_type}] [item_name] Tag description. It can span over multiple lines
+/// like this.
 ```
+
+`item_type` and `item_name` are optional and may not be applicable to all documented items. `item_name` can be surrounded by square bracket, which is used to indicate optional parameters of functions.
 
 *GMDoc currently collects documentation only from scripts!*
 
@@ -65,13 +66,6 @@ During the initialization you will be asked to input following values:
 After the initialization is done, a `gmdoc.json` file will be created in the project's folder, as well as a new directory `docs_src`, where you can add [custom documentation pages](#custom-documentation-pages).
 
 ## Supported tags
-The general format for tags is following:
-```gml
-/// @tag [{item_type}] [item_name] Tag description. It can span over multiple lines
-/// like this.
-```
-`item_type` and `item_name` are optional and may not be applicable to all documented items. `item_name` can be surrounded by square bracket, which is used to indicate optional parameters of functions.
-
 Tag | Description
 --- | -----------
 `@deprecated` | Marks an API as deprecated.
