@@ -189,6 +189,11 @@ def resource_to_markdown(r):
         (' <span class="badge badge-warning">DEPRECATED</span>' if _deprecated else "") + \
         (' <span class="badge badge-danger">OBSOLETE</span>' if _obsolete else ""))
 
+    # Inheritance
+    _extends = docs.get_tag("extends")
+    if _extends:
+        content.append('<small>Extends <a href="{name}.html">{name}</a></small>'.format(name=_extends.desc))
+
     content.append(
         '<span class="badge badge-secondary">{}</span>'.format(type(r).__name__.lower()) + \
         (' <span class="badge badge-info">read-only</span>' if _readonly else ""))
@@ -228,7 +233,7 @@ def resource_to_markdown(r):
             members_row = "| [{name}](" +r.name + ".{name}.html) | {desc} |"
 
             content.append(
-                members_header + "\n".join([members_row.format(**{"name": c.name, "desc": c.docs.get_tag("member").desc}) for c in r.children]))
+                members_header + "\n".join([members_row.format(name=c.name, desc=c.docs.get_tag("member").desc) for c in r.children]))
 
     # Function arguments
     if isinstance(r, Function):
@@ -243,7 +248,7 @@ def resource_to_markdown(r):
             arguments_row = "| {name} | `{type}` | {desc} |"
 
             content.append(
-                arguments_header + "\n".join([arguments_row.format(**{"name": p.name, "type": p.type, "desc": p.desc}) for p in _params]))
+                arguments_header + "\n".join([arguments_row.format(name=p.name, type=p.type, desc=p.desc) for p in _params]))
 
     # Function return value
     if isinstance(r, Function):
@@ -263,7 +268,7 @@ def resource_to_markdown(r):
             properties_row = "| [{name}](" +r.name + ".{name}.html) | {desc} |"
 
             content.append(
-                properties_header + "\n".join([properties_row.format(**{"name": p.name, "desc": p.docs.get_tag("var").desc}) for p in _props]))
+                properties_header + "\n".join([properties_row.format(name=p.name, desc=p.docs.get_tag("var").desc) for p in _props]))
 
         # Methods
         _methods = r.get_children(_type=Function, _docs=True)
@@ -277,7 +282,16 @@ def resource_to_markdown(r):
             methods_row = "| [{name}](" +r.name + ".{name}.html) | {desc} |"
 
             content.append(
-                methods_header + "\n".join([methods_row.format(**{"name": m.name, "desc": m.docs.get_tag("desc").desc if m.docs.get_tag("desc") else ""}) for m in _methods]))
+                methods_header + "\n".join([methods_row.format(name=m.name, desc=m.docs.get_tag("desc").desc if m.docs.get_tag("desc") else "") for m in _methods]))
+
+    # Throws
+    _throws = docs.get_tag("throws", single=False)
+    if _throws:
+        throws_item = "  * [{type}]({type}.html) - {desc}"
+
+        content.append(
+            "## Throws\n" + \
+            "\n".join([throws_item.format(type=t.type, desc=t.desc) for t in _throws]))
 
     # Example
     _add_basic("example", "Example")
