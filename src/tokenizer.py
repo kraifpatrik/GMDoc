@@ -177,6 +177,7 @@ DELIMITERS = {
     r"\$": Token.Type.DOLLAR,
 }
 
+REGEX_CACHE = {}
 
 class Tokenizer(object):
     def tokenize(self, _code: str):
@@ -184,7 +185,13 @@ class Tokenizer(object):
         at = 0
 
         def get_token(_regex, _type):
-            m = re.match(_regex, _code, flags=re.IGNORECASE)
+            if _regex in REGEX_CACHE:
+                r = REGEX_CACHE[_regex]
+            else:
+                r = re.compile(_regex, flags=re.IGNORECASE)
+                REGEX_CACHE[_regex] = r
+
+            m = r.match(_code)
             if m:
                 _start = m.start(0)
                 _len = m.end(0)
