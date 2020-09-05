@@ -4,9 +4,9 @@ import os
 import sys
 
 from .meta import Meta
-from .parser import Parser
-from .printer import *
-from .tokenizer import *
+from .parser import Parser, Constructor, Enum
+from .printer import resource_to_markdown, make_pages
+from .tokenizer import Tokenizer
 from .utils import *
 
 
@@ -165,7 +165,7 @@ class BuildTarget(Target):
                 "obsolete": True if r.docs.get_tag("obsolete") else False
             }
 
-            if isinstance(r, Constructor):
+            if isinstance(r, (Constructor, Enum)):
                 children = r.get_children(_docs=True)
                 if children:
                     children_toc = {}

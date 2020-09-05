@@ -209,6 +209,8 @@ def resource_to_markdown(r):
             _desc = docs.get_tag("macro")
         elif isinstance(r, Enum):
             _desc = docs.get_tag("enum")
+        elif isinstance(r, Member):
+            _desc = docs.get_tag("member")
         elif isinstance(r, Variable):
             _desc = docs.get_tag("var")
 
@@ -223,7 +225,7 @@ def resource_to_markdown(r):
                 "| ---- | ----------- |\n"
             )
 
-            members_row = "| `{name}` | {desc} |"
+            members_row = "| [{name}](" +r.name + ".{name}.html) | {desc} |"
 
             content.append(
                 members_header + "\n".join([members_row.format(**{"name": c.name, "desc": c.docs.get_tag("member").desc}) for c in r.children]))
