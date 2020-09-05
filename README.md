@@ -206,6 +206,15 @@ By default unmodified gmdoc.json file contains a key "toc" (table of contents) w
 }
 ```
 
+**Note:** This is a shortened version of:
+```json
+"toc": {
+  "Project Docs": {
+    "file": "index.md"
+  }
+}
+```
+
 It is possible to include custom pages into the documentation by adding a new key-value pair into the table of contents like so:
 
 ```json
