@@ -88,8 +88,7 @@ Tag | Description
 `@var` | Add a description to a variable.
 
 ## Links
-You can add links to another documented items into tag descriptions using
-`{@link <item-name>}`.
+You can add links to another documented items into tag descriptions using `{@link item_name}`.
 
 ## Examples
 ```gml
