@@ -13,6 +13,7 @@ class Token(object):
         AMPERSAND = auto()
         ASTERISK = auto()
         AT = auto()
+        BACKSLASH = auto()
         # BEGIN = auto()
         BOOL = auto()
         BRACKET_CURLY_LEFT = auto()
@@ -148,11 +149,13 @@ RESERVED = {
 
 DELIMITERS = {
     r"_": Token.Type.UNDERSCORE,
-    r"\-": Token.Type.MINUS,
     r",": Token.Type.COMMA,
     r";": Token.Type.SEMICOLON,
     r":": Token.Type.COLON,
     r"!": Token.Type.EXCLAMATION,
+    r"@": Token.Type.AT,
+    r"/": Token.Type.SLASH,
+    r"\-": Token.Type.MINUS,
     r"\?": Token.Type.QUESTION,
     r"\.": Token.Type.DOT,
     r"\(": Token.Type.BRACKET_LEFT,
@@ -161,20 +164,19 @@ DELIMITERS = {
     r"\]": Token.Type.BRACKET_SQUARE_RIGHT,
     r"\{": Token.Type.BRACKET_CURLY_LEFT,
     r"\}": Token.Type.BRACKET_CURLY_RIGHT,
-    r"@": Token.Type.AT,
     r"\*": Token.Type.ASTERISK,
-    r"/": Token.Type.SLASH,
+    r"\\": Token.Type.BACKSLASH,
+    r"\^": Token.Type.CARET,
+    r"\+": Token.Type.PLUS,
+    r"\|": Token.Type.PIPE,
+    r"\$": Token.Type.DOLLAR,
     r"&": Token.Type.AMPERSAND,
     r"#": Token.Type.HASH,
     r"%": Token.Type.PERCENT,
-    r"\^": Token.Type.CARET,
-    r"\+": Token.Type.PLUS,
     r"<": Token.Type.LESS_THAN,
     r"=": Token.Type.EQUALS,
     r">": Token.Type.GREATER_THAN,
-    r"\|": Token.Type.PIPE,
     r"~": Token.Type.TILDE,
-    r"\$": Token.Type.DOLLAR,
 }
 
 REGEX_CACHE = {}
