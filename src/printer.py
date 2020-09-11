@@ -21,6 +21,7 @@ def add_bootstrap(code, table_class=""):
             table_class=table_class), code)
     code = re.sub(r"</table>", '</table></div>', code)
     code = code.replace('<pre>', '<pre class="rounded">')
+    code = code.replace('<blockquote>', '<blockquote class="alert alert-light">')
     return code
 
 
