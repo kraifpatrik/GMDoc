@@ -1,7 +1,7 @@
 # GMDoc
 > Documentation generator for GameMaker Studio 2. Now supports GMS2.3+!
 
-![License](https://img.shields.io/github/license/kraifpatrik/ce)
+![License](https://img.shields.io/github/license/kraifpatrik/gmdoc)
 
 Donate: [PayPal.Me](https://www.paypal.me/kraifpatrik/5usd)
 
