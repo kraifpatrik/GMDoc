@@ -280,10 +280,10 @@ def resource_to_markdown(r):
             )
 
             properties_row = "| [{name}](" + \
-                r.name + ".{name}.html) | {desc} |"
+                r.name + ".{link}.html) | {desc} |"
 
             content.append(
-                properties_header + "\n".join([properties_row.format(name=p.name, desc=p.docs.get_tag("var").desc) for p in _props]))
+                properties_header + "\n".join([properties_row.format(name=__get_name(p), link=p.name, desc=p.docs.get_tag("var").desc) for p in _props]))
 
         # Methods
         _methods = r.get_children(_type=Function, _docs=True)
@@ -294,10 +294,10 @@ def resource_to_markdown(r):
                 "| ---- | ----------- |\n"
             )
 
-            methods_row = "| [{name}](" + r.name + ".{name}.html) | {desc} |"
+            methods_row = "| [{name}](" + r.name + ".{link}.html) | {desc} |"
 
             content.append(
-                methods_header + "\n".join([methods_row.format(name=__get_name(m), desc=__get_desc(m)) for m in _methods]))
+                methods_header + "\n".join([methods_row.format(name=__get_name(m), link=m.name, desc=__get_desc(m)) for m in _methods]))
 
     # Throws
     _throws = docs.get_tag("throws", single=False)
