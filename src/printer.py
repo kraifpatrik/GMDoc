@@ -21,7 +21,8 @@ def add_bootstrap(code, table_class=""):
             table_class=table_class), code)
     code = re.sub(r"</table>", '</table></div>', code)
     code = code.replace('<pre>', '<pre class="rounded">')
-    code = code.replace('<blockquote>', '<blockquote class="alert alert-light">')
+    code = code.replace(
+        '<blockquote>', '<blockquote class="alert alert-light">')
     return code
 
 
@@ -184,19 +185,23 @@ def resource_to_markdown(r):
     _obsolete = docs.get_tag("obsolete")
     _readonly = docs.get_tag("readonly")
 
+    SPAN_DEPRECATED = ' <span class="badge badge-warning">DEPRECATED</span>'
+    SPAN_OBOSLETE = ' <span class="badge badge-danger">OBSOLETE</span>'
+
     # Name and type
     content.append(
-        "# {}".format(r.name) + \
-        (' <span class="badge badge-warning">DEPRECATED</span>' if _deprecated else "") + \
-        (' <span class="badge badge-danger">OBSOLETE</span>' if _obsolete else ""))
+        "# {}".format(r.name) +
+        (SPAN_DEPRECATED if _deprecated else "") +
+        (SPAN_OBOSLETE if _obsolete else ""))
 
     # Inheritance
     _extends = docs.get_tag("extends")
     if _extends:
-        content.append('<small>Extends <a href="{name}.html">{name}</a></small>'.format(name=_extends.desc))
+        content.append(
+            '<small>Extends <a href="{name}.html">{name}</a></small>'.format(name=_extends.desc))
 
     content.append(
-        '<span class="badge badge-secondary">{}</span>'.format(type(r).__name__.lower()) + \
+        '<span class="badge badge-secondary">{}</span>'.format(type(r).__name__.lower()) +
         (' <span class="badge badge-info">read-only</span>' if _readonly else ""))
 
     # Function signature
@@ -231,7 +236,7 @@ def resource_to_markdown(r):
                 "| ---- | ----------- |\n"
             )
 
-            members_row = "| [{name}](" +r.name + ".{name}.html) | {desc} |"
+            members_row = "| [{name}](" + r.name + ".{name}.html) | {desc} |"
 
             content.append(
                 members_header + "\n".join([members_row.format(name=c.name, desc=c.docs.get_tag("member").desc) for c in r.children]))
@@ -257,6 +262,14 @@ def resource_to_markdown(r):
 
     # Constructor specific
     if isinstance(r, Constructor):
+        def __get_name(m):
+            return m.name + \
+                (SPAN_DEPRECATED if m.docs.get_tag("deprecated") else "") + \
+                (SPAN_OBOSLETE if m.docs.get_tag("obsolete") else "")
+
+        def __get_desc(m):
+            return m.docs.get_tag("desc").desc if m.docs.get_tag("desc") else ""
+
         # Properties
         _props = r.get_children(_type=Variable, _docs=True)
         if _props:
@@ -266,7 +279,8 @@ def resource_to_markdown(r):
                 "| ---- | ----------- |\n"
             )
 
-            properties_row = "| [{name}](" +r.name + ".{name}.html) | {desc} |"
+            properties_row = "| [{name}](" + \
+                r.name + ".{name}.html) | {desc} |"
 
             content.append(
                 properties_header + "\n".join([properties_row.format(name=p.name, desc=p.docs.get_tag("var").desc) for p in _props]))
@@ -280,10 +294,10 @@ def resource_to_markdown(r):
                 "| ---- | ----------- |\n"
             )
 
-            methods_row = "| [{name}](" +r.name + ".{name}.html) | {desc} |"
+            methods_row = "| [{name}](" + r.name + ".{name}.html) | {desc} |"
 
             content.append(
-                methods_header + "\n".join([methods_row.format(name=m.name, desc=m.docs.get_tag("desc").desc if m.docs.get_tag("desc") else "") for m in _methods]))
+                methods_header + "\n".join([methods_row.format(name=__get_name(m), desc=__get_desc(m)) for m in _methods]))
 
     # Throws
     _throws = docs.get_tag("throws", single=False)
@@ -291,7 +305,7 @@ def resource_to_markdown(r):
         _throws.sort(key=lambda v: v.type)
         throws_item = "  * [{type}]({type}.html) - {desc}"
         content.append(
-            "## Throws\n" + \
+            "## Throws\n" +
             "\n".join([throws_item.format(type=t.type, desc=t.desc) for t in _throws]))
 
     # Example
